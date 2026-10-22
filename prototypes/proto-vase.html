@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ACT III 画风原型 · 陶瓶黑绘</title>
+<style>
+  html, body {
+    margin: 0; min-height: 100%;
+    background: radial-gradient(circle at 50% 38%, #1a130d 0%, #080605 72%);
+    color: #c9b79c;
+    font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+  }
+  body {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px; padding: 14px 12px; box-sizing: border-box;
+  }
+  h1 {
+    margin: 0; font-size: 13px; font-weight: 400;
+    letter-spacing: .3em; color: #8d7758; text-transform: uppercase;
+  }
+  canvas {
+    width: min(94vw, 900px); height: auto; display: block;
+    box-shadow: 0 20px 70px rgba(0, 0, 0, .85), 0 0 0 1px rgba(201, 138, 86, .16);
+  }
+  .bar { display: flex; gap: 8px; }
+  button {
+    appearance: none; cursor: pointer;
+    background: transparent; color: #a68a63;
+    border: 1px solid #4a3a2a;
+    padding: 5px 16px; font-size: 12px; letter-spacing: .1em;
+    font-family: inherit; transition: .16s;
+  }
+  button:hover { color: #e8d3ae; border-color: #8a6a44; }
+  button[aria-pressed="true"] { color: #1a120b; background: #c98a56; border-color: #c98a56; }
+  .note { margin: 0; font-size: 11px; color: #63553f; letter-spacing: .05em; text-align: center; }
+</style>
+</head>
+<body>
+<h1>Act III · The Cyclops Isle</h1>
+<canvas id="c" width="960" height="540"></canvas>
+<div class="bar">
+  <button data-scene="combat" aria-pressed="true">战斗房</button>
+  <button data-scene="boss" aria-pressed="false">首领房</button>
+</div>
+<p class="note">原型仅用于确认画风：赭红陶土底 · 黑绘剪影 · 白色点缀 · 回纹边框 · 火光照明</p>
+<script>
+(function () {
+  const cvs = document.getElementById('c');
+  const ctx = cvs.getContext('2d');
+  const W = 480, H = 270, RS = 2;
+  ctx.scale(RS, RS);
+
+  // 黑绘陶瓶配色：赤陶底、黑釉人物、附加白点缀
+  const CLAY = '#a85732';
+  const CLAY_DEEP = '#8e4526';
+  const CLAY_LIGHT = '#c47a4e';
+  const INK = '#150f0b';
+  const INK_SOFT = '#241a13';
+  const CHALK = '#f2e7d3';
+  const PURPLE = '#5c2a2e';
+
+  let scene = 'combat';
+  let t = 0;
+
+  function rnd(i) {
+    const x = Math.sin(i * 127.1 + 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  // ── 回纹：连续折带 ──────────────────────
+  function meander(y, h, flip) {
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.fillRect(0, y, W, h);
+
+    const u = h * 1.15;
+    const top = y + h * 0.16;
+    const bot = y + h * 0.84;
+
+    ctx.strokeStyle = CLAY_LIGHT;
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'miter';
+
+    ctx.beginPath();
+    let x = -u;
+    ctx.moveTo(x, bot);
+    while (x < W + u) {
+      ctx.lineTo(x, top);
+      ctx.lineTo(x + u * 0.52, top);
+      ctx.lineTo(x + u * 0.52, top + h * 0.40);
+      ctx.lineTo(x + u * 0.24, top + h * 0.40);
+      ctx.lineTo(x + u * 0.24, top + h * 0.16);
+      ctx.lineTo(x + u * 0.38, top + h * 0.16);
+      ctx.lineTo(x + u * 0.38, bot);
+      ctx.lineTo(x + u, bot);
+      x += u;
+    }
+    ctx.stroke();
+
+    // 白细线压边，与岩壁分开
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, flip ? y : y + h);
+    ctx.lineTo(W, flip ? y : y + h);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── 地面：赤陶 + 碎石 + 裂纹 ────────────
+  function drawGround() {
+    const g = ctx.createLinearGradient(0, 20, 0, H - 20);
+    g.addColorStop(0, CLAY_DEEP);
+    g.addColorStop(0.42, CLAY);
+    g.addColorStop(1, CLAY_DEEP);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // 陶土斑驳
+    for (let i = 0; i < 320; i++) {
+      const x = rnd(i) * W;
+      const y = 18 + rnd(i + 999) * (H - 36);
+      const a = 0.025 + rnd(i + 77) * 0.055;
+      ctx.fillStyle = rnd(i + 33) > 0.55
+        ? 'rgba(60, 24, 8,' + a + ')'
+        : 'rgba(232, 176, 130,' + a + ')';
+      ctx.fillRect(x, y, 2 + rnd(i + 5) * 7, 1 + rnd(i + 6) * 2);
+    }
+
+    // 裂纹
+    ctx.strokeStyle = 'rgba(48, 20, 8, 0.20)';
+    ctx.lineWidth = 0.8;
+    for (let c = 0; c < 13; c++) {
+      let x = 20 + rnd(c * 13) * (W - 40);
+      let y = 40 + rnd(c * 17) * (H - 80);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      for (let s = 0; s < 5; s++) {
+        x += (rnd(c * 31 + s) - 0.5) * 22;
+        y += (rnd(c * 41 + s) - 0.5) * 14;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // 碎石
+    for (let i = 0; i < 40; i++) {
+      const x = 16 + rnd(i * 7) * (W - 32);
+      const y = 34 + rnd(i * 11) * (H - 60);
+      ctx.fillStyle = 'rgba(70, 30, 12, 0.22)';
+      ctx.beginPath();
+      ctx.ellipse(x, y, 1.6 + rnd(i) * 2.4, 1 + rnd(i + 2) * 1.6, rnd(i) * 3, 0, 6.3);
+      ctx.fill();
+    }
+
+    // 洞窟水洼（反光让画面透气）
+    [[118, 214, 22, 6], [352, 88, 18, 5]].forEach(function (p) {
+      ctx.fillStyle = 'rgba(20, 14, 10, 0.30)';
+      ctx.beginPath();
+      ctx.ellipse(p[0], p[1], p[2], p[3], 0, 0, 6.3);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(196, 122, 78, 0.28)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.ellipse(p[0], p[1] - 0.5, p[2] * 0.6, p[3] * 0.45, 0, 0, 6.3);
+      ctx.stroke();
+    });
+  }
+
+  // ── 岩壁：暗赤陶块 + 黑描边，避免大面积黑块把画面压死 ──
+  function stone(x, y, w, h, seed) {
+    ctx.beginPath();
+    const n = 5;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const rx = (w / 2) * (0.62 + rnd(seed + i) * 0.46);
+      const ry = (h / 2) * (0.62 + rnd(seed + i + 9) * 0.46);
+      const px = x + Math.cos(a) * rx;
+      const py = y + Math.sin(a) * ry;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = CLAY_DEEP;
+    ctx.fill();
+    ctx.strokeStyle = INK_SOFT;
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+  }
+
+  function drawWalls() {
+    // 顶部岩石带
+    let x = -14;
+    let k = 0;
+    while (x < W + 14) {
+      const w = 30 + rnd(k * 5) * 26;
+      const h = 22 + rnd(k * 9) * 20;
+      stone(x + w / 2, 18 + h * 0.28, w, h * 1.5, k * 3.1);
+      x += w * 0.82;
+      k++;
+    }
+
+    // 左右岩石
+    for (let y = 26; y < H - 10; y += 26) {
+      stone(4 + rnd(y) * 4, y + 10, 28, 34, y * 1.7);
+      stone(W - 4 - rnd(y + 3) * 4, y + 10, 28, 34, y * 2.3 + 40);
+    }
+
+    // 底部岩石
+    x = -14;
+    k = 0;
+    while (x < W + 14) {
+      const w = 30 + rnd(k * 7) * 26;
+      const h = 18 + rnd(k * 3) * 14;
+      stone(x + w / 2, H - 14 - h * 0.2, w, h * 1.4, k * 4.7 + 100);
+      x += w * 0.85;
+      k++;
+    }
+
+    // 岩石上的白色短弧刻纹
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.22)';
+    ctx.lineWidth = 0.9;
+    for (let i = 0; i < 30; i++) {
+      const px = 12 + rnd(i * 5) * (W - 24);
+      const py = 24 + rnd(i * 9) * 18;
+      ctx.beginPath();
+      ctx.arc(px, py, 1.8 + rnd(i) * 2, Math.PI * 0.1, Math.PI * 0.9);
+      ctx.stroke();
+    }
+
+    // 钟乳石
+    [[64, 34, 10], [198, 30, 7], [318, 32, 12], [412, 28, 8]].forEach(function (s) {
+      ctx.beginPath();
+      ctx.moveTo(s[0] - s[2] * 0.42, 18);
+      ctx.lineTo(s[0] + s[2] * 0.42, 18);
+      ctx.lineTo(s[0] + s[2] * 0.1, 18 + s[1]);
+      ctx.quadraticCurveTo(s[0], 18 + s[1] + 3, s[0] - s[2] * 0.16, 18 + s[1]);
+      ctx.closePath();
+      ctx.fillStyle = CLAY_DEEP;
+      ctx.fill();
+      ctx.strokeStyle = INK_SOFT;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    });
+  }
+
+  // ── 剪影：黑釉填充 + 附加白点缀 ─────────
+  function body(build, fill) {
+    ctx.beginPath();
+    build();
+    ctx.fillStyle = fill || INK;
+    ctx.fill();
+  }
+
+  // 以脚底为锚点整体缩放
+  function scaled(s, x, y, fn) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    ctx.translate(-x, -y);
+    fn();
+    ctx.restore();
+  }
+
+  // 主角：希腊弓箭手，科林斯头盔带羽冠
+  function drawHero(x, y) {
+    const bob = Math.sin(t * 2.1) * 0.7;
+    const bx = x, by = y + bob;
+
+    // 羽冠（白点缀，最醒目的希腊特征）
+    ctx.beginPath();
+    ctx.moveTo(bx - 7, by - 38);
+    ctx.quadraticCurveTo(bx - 2, by - 45, bx + 8, by - 42);
+    ctx.quadraticCurveTo(bx + 2, by - 40, bx - 1, by - 35);
+    ctx.closePath();
+    ctx.fillStyle = CHALK;
+    ctx.fill();
+
+    // 头盔 + 头
+    body(function () {
+      ctx.moveTo(bx - 6, by - 37);
+      ctx.quadraticCurveTo(bx - 8.5, by - 31, bx - 6, by - 27);
+      ctx.lineTo(bx + 6, by - 27);
+      ctx.quadraticCurveTo(bx + 8.5, by - 31, bx + 6, by - 37);
+      ctx.quadraticCurveTo(bx, by - 41, bx - 6, by - 37);
+      ctx.closePath();
+    });
+
+    // 盔缝白线
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.5)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(bx, by - 39);
+    ctx.lineTo(bx, by - 28);
+    ctx.stroke();
+
+    // 披风
+    body(function () {
+      ctx.moveTo(bx - 7, by - 28);
+      ctx.quadraticCurveTo(bx - 15, by - 17, bx - 12, by - 1);
+      ctx.quadraticCurveTo(bx - 4, by - 4, bx + 1, by - 3);
+      ctx.quadraticCurveTo(bx + 10, by - 7, bx + 8, by - 27);
+      ctx.closePath();
+    }, INK_SOFT);
+
+    // 躯干
+    body(function () {
+      ctx.moveTo(bx - 6.5, by - 27);
+      ctx.lineTo(bx + 6.5, by - 27);
+      ctx.lineTo(bx + 5, by - 11);
+      ctx.lineTo(bx - 5, by - 11);
+      ctx.closePath();
+    });
+
+    // 腿
+    body(function () {
+      ctx.moveTo(bx - 5, by - 12);
+      ctx.lineTo(bx - 1.4, by - 12);
+      ctx.lineTo(bx - 2, by);
+      ctx.lineTo(bx - 6, by);
+      ctx.closePath();
+    });
+    body(function () {
+      ctx.moveTo(bx + 1.4, by - 12);
+      ctx.lineTo(bx + 5, by - 12);
+      ctx.lineTo(bx + 6, by);
+      ctx.lineTo(bx + 2, by);
+      ctx.closePath();
+    });
+
+    // 胸甲纹样
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.4)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(bx - 5, by - 24);
+    ctx.quadraticCurveTo(bx, by - 20, bx + 5, by - 24);
+    ctx.stroke();
+
+    // 弓
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 2.6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(bx + 9.5, by - 33);
+    ctx.quadraticCurveTo(bx + 19.5, by - 20, bx + 9.5, by - 7);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.85)';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(bx + 9.5, by - 33);
+    ctx.lineTo(bx + 9.5, by - 7);
+    ctx.stroke();
+
+    ctx.fillStyle = CHALK;
+    ctx.beginPath();
+    ctx.arc(bx + 9.5, by - 33, 1.2, 0, 6.3);
+    ctx.arc(bx + 9.5, by - 7, 1.2, 0, 6.3);
+    ctx.fill();
+  }
+
+  // 亡者：完整骨架
+  function drawSkeleton(x, y, i) {
+    const bob = Math.sin(t * 2.6 + i) * 0.5;
+    const bx = x, by = y + bob;
+
+    // 头骨
+    body(function () {
+      ctx.moveTo(bx - 4.2, by - 26);
+      ctx.quadraticCurveTo(bx - 6.8, by - 21, bx - 3.6, by - 18);
+      ctx.lineTo(bx + 3.6, by - 18);
+      ctx.quadraticCurveTo(bx + 6.8, by - 21, bx + 4.2, by - 26);
+      ctx.quadraticCurveTo(bx, by - 29.5, bx - 4.2, by - 26);
+      ctx.closePath();
+    });
+
+    // 眼窝
+    ctx.fillStyle = CHALK;
+    ctx.beginPath();
+    ctx.ellipse(bx - 2, by - 22.6, 1.5, 1.8, 0, 0, 6.3);
+    ctx.ellipse(bx + 2, by - 22.6, 1.5, 1.8, 0, 0, 6.3);
+    ctx.fill();
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.arc(bx - 2, by - 22.4, 0.7, 0, 6.3);
+    ctx.arc(bx + 2, by - 22.4, 0.7, 0, 6.3);
+    ctx.fill();
+
+    // 下颌
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.6)';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(bx - 2.6, by - 19.4);
+    ctx.lineTo(bx + 2.6, by - 19.4);
+    ctx.stroke();
+
+    // 颈椎
+    body(function () {
+      ctx.rect(bx - 1.2, by - 18, 2.4, 3);
+    });
+
+    // 胸腔
+    body(function () {
+      ctx.moveTo(bx - 6, by - 15);
+      ctx.quadraticCurveTo(bx - 6.4, by - 9, bx - 3, by - 7);
+      ctx.lineTo(bx + 3, by - 7);
+      ctx.quadraticCurveTo(bx + 6.4, by - 9, bx + 6, by - 15);
+      ctx.closePath();
+    });
+
+    // 肋骨
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.55)';
+    ctx.lineWidth = 0.65;
+    ctx.beginPath();
+    for (let r = 0; r < 3; r++) {
+      const yy = by - 13.4 + r * 2.6;
+      ctx.moveTo(bx - 4.6 + r * 0.5, yy);
+      ctx.quadraticCurveTo(bx, yy + 1.4, bx + 4.6 - r * 0.5, yy);
+    }
+    ctx.stroke();
+
+    // 骨盆
+    body(function () {
+      ctx.moveTo(bx - 4, by - 7);
+      ctx.lineTo(bx + 4, by - 7);
+      ctx.lineTo(bx + 2.4, by - 3.4);
+      ctx.lineTo(bx - 2.4, by - 3.4);
+      ctx.closePath();
+    });
+
+    // 腿骨
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.62)';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(bx - 2.2, by - 3.4);
+    ctx.lineTo(bx - 2.8, by);
+    ctx.moveTo(bx + 2.2, by - 3.4);
+    ctx.lineTo(bx + 2.8, by);
+    ctx.stroke();
+
+    // 手臂 + 骨棒
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bx + 5, by - 14);
+    ctx.lineTo(bx + 7.4, by - 9);
+    ctx.stroke();
+
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(bx + 7.6, by - 10);
+    ctx.lineTo(bx + 10.6, by - 1.4);
+    ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.arc(bx + 10.8, by - 0.6, 2.1, 0, 6.3);
+    ctx.fill();
+  }
+
+  // 独眼巨人
+  function drawCyclops(x, y) {
+    const breathe = Math.sin(t * 1.3) * 1.2;
+    const bx = x, by = y + breathe * 0.4;
+
+    // 腿
+    body(function () {
+      ctx.moveTo(bx - 23, by - 36);
+      ctx.quadraticCurveTo(bx - 27, by - 18, bx - 25, by);
+      ctx.lineTo(bx - 11, by);
+      ctx.quadraticCurveTo(bx - 12, by - 20, bx - 8, by - 36);
+      ctx.closePath();
+    });
+    body(function () {
+      ctx.moveTo(bx + 8, by - 36);
+      ctx.quadraticCurveTo(bx + 12, by - 20, bx + 11, by);
+      ctx.lineTo(bx + 25, by);
+      ctx.quadraticCurveTo(bx + 27, by - 18, bx + 23, by - 36);
+      ctx.closePath();
+    });
+
+    // 兽皮裙
+    body(function () {
+      ctx.moveTo(bx - 24, by - 38);
+      ctx.lineTo(bx + 24, by - 38);
+      ctx.lineTo(bx + 21, by - 26);
+      ctx.lineTo(bx - 21, by - 26);
+      ctx.closePath();
+    }, INK_SOFT);
+
+    // 左臂（垂放）
+    body(function () {
+      ctx.moveTo(bx - 26, by - 74);
+      ctx.quadraticCurveTo(bx - 40, by - 62, bx - 38, by - 40);
+      ctx.quadraticCurveTo(bx - 34, by - 34, bx - 30, by - 42);
+      ctx.quadraticCurveTo(bx - 30, by - 58, bx - 20, by - 66);
+      ctx.closePath();
+    });
+
+    // 躯干
+    body(function () {
+      ctx.moveTo(bx - 25, by - 38);
+      ctx.quadraticCurveTo(bx - 38 - breathe, by - 62, bx - 24, by - 82);
+      ctx.quadraticCurveTo(bx - 12, by - 95, bx, by - 96);
+      ctx.quadraticCurveTo(bx + 12, by - 95, bx + 24, by - 82);
+      ctx.quadraticCurveTo(bx + 38 + breathe, by - 62, bx + 25, by - 38);
+      ctx.closePath();
+    });
+
+    // 头
+    body(function () {
+      ctx.moveTo(bx - 16, by - 92);
+      ctx.quadraticCurveTo(bx - 18, by - 110, bx, by - 112);
+      ctx.quadraticCurveTo(bx + 18, by - 110, bx + 16, by - 92);
+      ctx.closePath();
+    });
+
+    // 右臂举棒
+    body(function () {
+      ctx.moveTo(bx + 22, by - 78);
+      ctx.quadraticCurveTo(bx + 36, by - 74, bx + 40, by - 58);
+      ctx.quadraticCurveTo(bx + 42, by - 50, bx + 36, by - 52);
+      ctx.quadraticCurveTo(bx + 30, by - 64, bx + 20, by - 68);
+      ctx.closePath();
+    });
+
+    // 独眼
+    ctx.fillStyle = CHALK;
+    ctx.beginPath();
+    ctx.ellipse(bx, by - 102, 9.5, 8, 0, 0, 6.3);
+    ctx.fill();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1.3;
+    ctx.stroke();
+
+    const gaze = Math.sin(t * 0.8) * 1.8;
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.arc(bx + gaze, by - 102, 3.6, 0, 6.3);
+    ctx.fill();
+    ctx.fillStyle = CHALK;
+    ctx.beginPath();
+    ctx.arc(bx + gaze - 1.2, by - 103.4, 1.1, 0, 6.3);
+    ctx.fill();
+
+    // 獠牙
+    ctx.fillStyle = CHALK;
+    ctx.beginPath();
+    ctx.moveTo(bx - 8.5, by - 90);
+    ctx.lineTo(bx - 6, by - 82);
+    ctx.lineTo(bx - 3.4, by - 90);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(bx + 3.4, by - 90);
+    ctx.lineTo(bx + 6, by - 82);
+    ctx.lineTo(bx + 8.5, by - 90);
+    ctx.closePath();
+    ctx.fill();
+
+    // 木棒（黑釉，带锤头）
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(bx + 37, by - 54);
+    ctx.lineTo(bx + 47, by - 100);
+    ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.ellipse(bx + 48, by - 108, 9, 12, -0.14, 0, 6.3);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.35)';
+    ctx.lineWidth = 0.9;
+    ctx.stroke();
+
+    // 胸口白色纹样
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.28)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(bx, by - 62, 14, Math.PI * 0.12, Math.PI * 0.88);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(bx, by - 62, 8.5, Math.PI * 0.18, Math.PI * 0.82);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(bx, by - 62, 3, 0, 6.3);
+    ctx.stroke();
+  }
+
+  // 陶罐
+  function drawJar(x, y) {
+    body(function () {
+      ctx.moveTo(x - 6, y - 17);
+      ctx.quadraticCurveTo(x - 12, y - 12, x - 9.5, y - 4);
+      ctx.quadraticCurveTo(x - 7, y, x, y);
+      ctx.quadraticCurveTo(x + 7, y, x + 9.5, y - 4);
+      ctx.quadraticCurveTo(x + 12, y - 12, x + 6, y - 17);
+      ctx.closePath();
+    }, INK_SOFT);
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.45)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(x - 9.8, y - 8);
+    ctx.lineTo(x + 9.8, y - 8);
+    ctx.moveTo(x - 8, y - 13);
+    ctx.lineTo(x + 8, y - 13);
+    ctx.stroke();
+  }
+
+  // ── 火光 ────────────────────────────────
+  function drawFire(cx, cy, seed) {
+    const f = 0.86 + Math.sin(t * 6.7 + seed) * 0.1 + Math.sin(t * 11.3 + seed * 2) * 0.05;
+    const r = 150 * f;
+
+    // 墙面光晕
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, 'rgba(255, 200, 120, 0.50)');
+    g.addColorStop(0.3, 'rgba(238, 140, 62, 0.22)');
+    g.addColorStop(1, 'rgba(180, 78, 28, 0)');
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, 6.3);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+
+    // 火焰三层
+    ctx.fillStyle = 'rgba(214, 92, 34, 0.75)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - 2, 7 * f, 12 * f, 0, 0, 6.3);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(248, 158, 62, 0.9)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - 1, 4.6 * f, 8.4 * f, 0, 0, 6.3);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 236, 176, 0.95)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 0.5, 2.4 * f, 4.6 * f, 0, 0, 6.3);
+    ctx.fill();
+
+    // 火盆
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.moveTo(cx - 7, cy + 3);
+    ctx.lineTo(cx + 7, cy + 3);
+    ctx.lineTo(cx + 5, cy + 9);
+    ctx.lineTo(cx - 5, cy + 9);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawVignette() {
+    const g = ctx.createRadialGradient(W / 2, H / 2, 60, W / 2, H / 2, W * 0.66);
+    g.addColorStop(0, 'rgba(10, 6, 3, 0)');
+    g.addColorStop(0.6, 'rgba(10, 6, 3, 0.20)');
+    g.addColorStop(1, 'rgba(8, 4, 2, 0.78)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // ── 陶瓶风 UI ───────────────────────────
+  function drawUI() {
+    // 血格：橄榄叶
+    for (let i = 0; i < 3; i++) {
+      const x = 22 + i * 16, y = 34;
+      ctx.beginPath();
+      ctx.moveTo(x, y - 5.5);
+      ctx.quadraticCurveTo(x + 6, y, x, y + 5.5);
+      ctx.quadraticCurveTo(x - 6, y, x, y - 5.5);
+      ctx.closePath();
+      ctx.fillStyle = i === 0 ? CHALK : 'rgba(242, 231, 211, 0.22)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(21, 15, 11, 0.8)';
+      ctx.lineWidth = 0.9;
+      ctx.stroke();
+    }
+
+    // 金币
+    ctx.fillStyle = CHALK;
+    ctx.beginPath();
+    ctx.arc(80, 34, 3.2, 0, 6.3);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(242, 231, 211, 0.9)';
+    ctx.font = '11px "Noto Serif SC", serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('× 4', 86, 35);
+
+    // 右上房间框
+    ctx.strokeStyle = 'rgba(242, 231, 211, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(W - 46, 26, 26, 16);
+    ctx.fillStyle = 'rgba(242, 231, 211, 0.8)';
+    ctx.beginPath();
+    ctx.arc(W - 33, 34, 2.6, 0, 6.3);
+    ctx.fill();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    drawGround();
+    drawWalls();
+
+    if (scene === 'combat') {
+      drawJar(96, 198);
+      drawJar(376, 112);
+      drawJar(154, 122);
+      scaled(1.35, 332, 202, function () { drawSkeleton(332, 202, 1); });
+      scaled(1.35, 298, 170, function () { drawSkeleton(298, 170, 2); });
+      scaled(1.35, 208, 218, function () { drawSkeleton(208, 218, 3); });
+      scaled(1.4, 190, 152, function () { drawHero(190, 152); });
+    } else {
+      drawJar(80, 206);
+      drawJar(400, 206);
+      scaled(1.18, 238, 218, function () { drawCyclops(238, 218); });
+    }
+
+    drawFire(54, 74, 1);
+    drawFire(W - 54, 74, 3.7);
+    drawVignette();
+
+    meander(0, 22, false);
+    meander(H - 22, 22, true);
+    drawUI();
+  }
+
+  let last = 0;
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000 || 0);
+    last = now;
+    t += dt;
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  document.querySelectorAll('button[data-scene]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      scene = b.dataset.scene;
+      document.querySelectorAll('button[data-scene]').forEach(function (o) {
+        o.setAttribute('aria-pressed', String(o === b));
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

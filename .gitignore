@@ -1,0 +1,17 @@
+# 构建产物
+*.exe
+dist*/
+build/
+
+# 依赖
+node_modules/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 临时文件
+*.log
+*.tmp
