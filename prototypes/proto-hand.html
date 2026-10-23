@@ -37,11 +37,13 @@
 </style>
 </head>
 <body>
-<h1>Act III · The Cyclops Isle</h1>
+<h1>Odyssey · 手绘画风原型</h1>
 <canvas id="c" width="960" height="540"></canvas>
 <div class="bar">
-  <button data-scene="combat" aria-pressed="true">战斗房</button>
-  <button data-scene="boss" aria-pressed="false">首领房</button>
+  <button data-scene="act1" aria-pressed="false">第一幕 · 海滩</button>
+  <button data-scene="act2" aria-pressed="false">第二幕 · 莲地</button>
+  <button data-scene="combat" aria-pressed="true">第三幕 · 战斗房</button>
+  <button data-scene="boss" aria-pressed="false">第三幕 · 首领房</button>
 </div>
 <p class="note">原型仅用于确认画风：粗黑描边 · 扁平色块 · 手绘抖动线条 · 火光与体积阴影</p>
 <script>
@@ -77,6 +79,30 @@
   const CY_SKIN = '#8e9375';
   const CY_SKIN_D = '#6c7157';
   const LEATHER = '#7d5a39';
+
+  /* ── 第一幕：伊斯马罗斯海滩 ─────────────────── */
+  const SAND = '#8d7853';
+  const SAND_D = '#6b5940';
+  const SAND_L = '#a89263';
+  const SEA = '#2c4a52';
+  const SEA_D = '#1d333b';
+  const FOAM = '#d3e2dc';
+  const WOOD = '#6b4a2f';
+  const WOOD_D = '#432e1c';
+
+  /* ── 第二幕：食莲人之地 ─────────────────────── */
+  const MUD = '#3f4a34';
+  const MUD_D = '#2f3826';
+  const MUD_L = '#56603f';
+  const POND = '#43565a';
+  const POND_L = '#5f7a78';
+  const REED = '#5e6b3c';
+  const TREE = '#2c3a22';
+  const TREE_L = '#3e4f2c';
+  const LOTUS_PINK = '#e8a8bd';
+  const LOTUS_DEEP = '#c4738f';
+  const LOTUS_Y = '#f0d27a';
+  const LOTUS_SKIN = '#b6c4ab';
 
   /* ── 确定性噪声：保证手绘抖动每帧稳定，不会变成噪点 ── */
   function jit(i) {
@@ -151,6 +177,82 @@
     ctx.restore();
   }
 
+  /* ── 第一幕地面：沙滩 ────────────────────────── */
+  function drawSandGround() {
+    ctx.fillStyle = SAND;
+    ctx.fillRect(0, 0, W, H);
+
+    // 沙面明暗：大块低对比
+    for (let i = 0; i < 36; i++) {
+      const cx = jit(i * 4.9) * W;
+      const cy = 24 + jit(i * 4.9 + 1) * (H - 30);
+      const rx = 28 + jit(i * 4.9 + 2) * 44;
+      const ry = 18 + jit(i * 4.9 + 3) * 26;
+      blobPath(cx, cy, rx, ry, i * 8.7, 8, 0.24);
+      ctx.fillStyle = i % 3 === 0 ? 'rgba(190,168,126,0.14)' : 'rgba(96,80,54,0.18)';
+      ctx.fill();
+    }
+
+    // 风吹沙纹：平缓的横向弧线，沙滩最典型的特征
+    for (let i = 0; i < 17; i++) {
+      const y = 30 + jit(i * 3.7) * (H - 56);
+      const x0 = 14 + jit(i * 3.7 + 1) * (W - 150);
+      const len = 54 + jit(i * 3.7 + 2) * 112;
+      ctx.strokeStyle = 'rgba(122,102,68,0.28)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(x0, y);
+      ctx.quadraticCurveTo(x0 + len * 0.5, y + sj(i * 3.7) * 5, x0 + len, y + sj(i * 3.7 + 1) * 2);
+      ctx.stroke();
+    }
+
+    // 沙粒
+    for (let i = 0; i < 440; i++) {
+      const x = jit(i * 1.9 + 5) * W;
+      const y = jit(i * 2.7 + 13) * H;
+      const r = 0.7 + jit(i * 3.3) * 1.2;
+      ctx.fillStyle = jit(i * 5.9) > 0.5 ? 'rgba(198,176,132,0.30)' : 'rgba(88,72,48,0.30)';
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 6.3);
+      ctx.fill();
+    }
+
+    // 贝壳：几片扇形，沙面上唯一的亮色小点
+    for (let i = 0; i < 8; i++) {
+      const x = 34 + jit(i * 7.7) * (W - 68);
+      const y = 52 + jit(i * 7.7 + 1) * (H - 100);
+      const r = 2.2 + jit(i * 7.7 + 2) * 1.5;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(sj(i * 7.7) * 0.9);
+      ctx.beginPath();
+      ctx.arc(0, 0, r, Math.PI, 0);
+      ctx.closePath();
+      ctx.fillStyle = jit(i) > 0.5 ? '#e8dcc2' : '#d7c6a6';
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(74,58,38,0.7)';
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, -r);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 脚印：成对凹陷，暗示这里刚有人跑过
+    for (let i = 0; i < 5; i++) {
+      const x = 62 + jit(i * 8.3) * (W - 124);
+      const y = 84 + jit(i * 8.3 + 1) * (H - 168);
+      for (let f = 0; f < 2; f++) {
+        ctx.fillStyle = 'rgba(104,86,58,0.22)';
+        ctx.beginPath();
+        ctx.ellipse(x + f * 5.8, y + f * 2.6, 2.3, 3.5, 0.24, 0, 6.3);
+        ctx.fill();
+      }
+    }
+  }
+
   /* ── 地面 ────────────────────────────────────── */
   function drawGround() {
     // 暖褐岩地
@@ -223,6 +325,629 @@
       ctx.strokeStyle = 'rgba(40,29,23,0.8)';
       ctx.stroke();
     }
+  }
+
+  /* ── 第一幕陈设：黑船、帐篷、营火、战利品 ─────── */
+  function drawCampProps() {
+    drawLoot(56, 96);
+    drawTent(150, 92);
+    drawCampfire(250, 96);
+    drawShip(104, 226);
+  }
+
+  // 黑船：横卧在沙滩上，船首朝左，船首画辟邪眼
+  function drawShip(cx, cy) {
+    shadow(cx, cy + 18, 62, 8, 0.26);
+
+    // 船体：尖首方尾
+    ink(function () {
+      ctx.moveTo(cx - 62, cy + 1);
+      ctx.quadraticCurveTo(cx - 34, cy - 19, cx + 26, cy - 18);
+      ctx.quadraticCurveTo(cx + 60, cy - 15, cx + 62, cy + 2);
+      ctx.quadraticCurveTo(cx + 58, cy + 17, cx + 24, cy + 18);
+      ctx.quadraticCurveTo(cx - 34, cy + 19, cx - 62, cy + 1);
+      ctx.closePath();
+    }, '#3d2718', 2.6);
+
+    // 舱底：更深的凹陷
+    ink(function () {
+      ctx.moveTo(cx - 52, cy + 1);
+      ctx.quadraticCurveTo(cx - 28, cy - 13, cx + 24, cy - 12);
+      ctx.quadraticCurveTo(cx + 50, cy - 10, cx + 52, cy + 2);
+      ctx.quadraticCurveTo(cx + 48, cy + 12, cx + 22, cy + 12);
+      ctx.quadraticCurveTo(cx - 28, cy + 13, cx - 52, cy + 1);
+      ctx.closePath();
+    }, '#241610', 2);
+
+    // 船肋
+    ctx.strokeStyle = 'rgba(132,96,60,0.5)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 5; i++) {
+      const bx = cx - 36 + i * 19;
+      const hh = 10 - Math.abs(i - 2) * 1.7;
+      ctx.beginPath();
+      ctx.moveTo(bx, cy - hh);
+      ctx.lineTo(bx + 1, cy + hh);
+      ctx.stroke();
+    }
+
+    // 船首辟邪眼
+    ctx.fillStyle = BONE;
+    ctx.beginPath();
+    ctx.ellipse(cx - 50, cy - 1, 7, 5.6, -0.2, 0, 6.3);
+    ctx.fill();
+    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.ellipse(cx - 51, cy - 1, 3.1, 3.4, 0, 0, 6.3);
+    ctx.fill();
+    ctx.fillStyle = '#2c4a52';
+    ctx.beginPath();
+    ctx.arc(cx - 51.4, cy - 1, 1.5, 0, 6.3);
+    ctx.fill();
+
+    // 收起的桅杆
+    ink(function () {
+      ctx.moveTo(cx + 2, cy - 4);
+      ctx.lineTo(cx + 7, cy - 3);
+      ctx.lineTo(cx + 6, cy + 8);
+      ctx.lineTo(cx + 3, cy + 8);
+      ctx.closePath();
+    }, '#6b4a2f', 1.4);
+  }
+
+  // 帐篷：俯视的梯形布帐，左亮右暗，中间一道脊
+  function drawTent(cx, cy) {
+    shadow(cx, cy + 18, 32, 7, 0.24);
+
+    // 帐布主体
+    ink(function () {
+      ctx.moveTo(cx - 30, cy + 16);
+      ctx.lineTo(cx - 17, cy - 13);
+      ctx.lineTo(cx + 17, cy - 13);
+      ctx.lineTo(cx + 30, cy + 16);
+      ctx.quadraticCurveTo(cx, cy + 24, cx - 30, cy + 16);
+      ctx.closePath();
+    }, '#8f6e46', 2.4);
+
+    // 右半边压暗，做出两个坡面
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 13);
+    ctx.lineTo(cx + 17, cy - 13);
+    ctx.lineTo(cx + 30, cy + 16);
+    ctx.quadraticCurveTo(cx, cy + 24, cx, cy + 21);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = 'rgba(46,31,18,0.30)';
+    ctx.fillRect(cx, cy - 14, 32, 40);
+    ctx.restore();
+
+    // 脊线
+    ctx.strokeStyle = '#4b3823';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 13);
+    ctx.lineTo(cx, cy + 21);
+    ctx.stroke();
+
+    // 前缘门帘：三角形的暗口
+    ctx.fillStyle = 'rgba(26,17,11,0.9)';
+    ctx.beginPath();
+    ctx.moveTo(cx - 9, cy + 19);
+    ctx.lineTo(cx, cy + 6);
+    ctx.lineTo(cx + 9, cy + 19);
+    ctx.quadraticCurveTo(cx, cy + 23, cx - 9, cy + 19);
+    ctx.closePath();
+    ctx.fill();
+
+    // 支杆顶端
+    ctx.strokeStyle = '#3b2a1a';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 13);
+    ctx.lineTo(cx, cy - 19);
+    ctx.stroke();
+  }
+
+  // 营火：石圈 + 炭 + 一点余烬的光
+  function drawCampfire(cx, cy) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(cx, cy - 2, 2, cx, cy - 2, 34);
+    g.addColorStop(0, 'rgba(255,150,60,0.28)');
+    g.addColorStop(1, 'rgba(255,90,30,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - 36, cy - 38, 72, 72);
+    ctx.restore();
+
+    // 石圈：八块扁石围一圈，各自微微旋转让轮廓不规则
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * 6.283 + 0.35 + sj(i * 1.7) * 0.1;
+      const rx = cx + Math.cos(a) * (14 + sj(i * 2.9) * 1.4);
+      const ry = cy + Math.sin(a) * (7.4 + sj(i * 2.9) * 1.1);
+      ctx.save();
+      ctx.translate(rx, ry);
+      ctx.rotate(sj(i * 4.3) * 0.7);
+      ink(function () {
+        ctx.ellipse(0, 0, 5 + jit(i * 2.3) * 1.6, 3.4 + jit(i * 3.7) * 1, 0, 0, 6.3);
+      }, i % 2 ? '#6e6355' : '#5c5347', 1.5);
+      ctx.restore();
+    }
+    // 炭床：不规则的黑堆
+    blobPath(cx, cy, 11, 5.4, 3.3, 7, 0.22);
+    ctx.fillStyle = '#2a1c14';
+    ctx.fill();
+    // 余烬
+    for (let i = 0; i < 5; i++) {
+      ctx.fillStyle = 'rgba(255,' + (120 + i * 12) + ',60,' + (0.55 - i * 0.07).toFixed(2) + ')';
+      ctx.beginPath();
+      ctx.arc(cx - 6 + jit(i * 4.1) * 12, cy - 2 + jit(i * 4.1 + 1) * 4, 1 + jit(i * 4.1 + 2) * 1.2, 0, 6.3);
+      ctx.fill();
+    }
+  }
+
+  // 战利品：木箱和斜靠的盾牌
+  function drawLoot(cx, cy) {
+    shadow(cx + 3, cy + 8, 18, 4.4, 0.24);
+    // 木箱
+    ink(function () { ctx.rect(cx - 10, cy - 8, 18, 15); }, '#7a5533', 2);
+    // 横向木板缝
+    ctx.strokeStyle = 'rgba(38,25,15,0.55)';
+    ctx.lineWidth = 1.2;
+    for (let i = 1; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(cx - 10, cy - 8 + i * 5);
+      ctx.lineTo(cx + 8, cy - 8 + i * 5);
+      ctx.stroke();
+    }
+    // 铁箍
+    ctx.strokeStyle = 'rgba(58,42,28,0.85)';
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.moveTo(cx - 7, cy - 8);
+    ctx.lineTo(cx - 7, cy + 7);
+    ctx.moveTo(cx + 5, cy - 8);
+    ctx.lineTo(cx + 5, cy + 7);
+    ctx.stroke();
+    // 箱盖受光
+    ctx.strokeStyle = 'rgba(196,158,108,0.5)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(cx - 9, cy - 7);
+    ctx.lineTo(cx + 7, cy - 7);
+    ctx.stroke();
+    // 盾牌
+    ink(function () { ctx.ellipse(cx + 16, cy - 2, 8.4, 9.4, 0.22, 0, 6.3); }, '#8a5a2e', 2.2);
+    ctx.fillStyle = TRIM;
+    ctx.beginPath();
+    ctx.arc(cx + 16, cy - 2, 2.6, 0, 6.3);
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+  }
+
+  /* ── 第二幕陈设：荷叶、莲花、睡倒的人 ─────────── */
+  function drawLotusProps() {
+    // 水面上漂着的荷叶
+    drawPad(96, 92, 15);
+    drawPad(70, 104, 10);
+    drawPad(356, 198, 17);
+    drawPad(330, 212, 11);
+    drawPad(214, 238, 13);
+
+    // 立在水里的莲花
+    drawBloom(96, 82, 1);
+    drawBloom(356, 188, 1.15);
+    drawBloom(120, 108, 0.85);
+
+    // 吃多了莲花、直接躺下的人
+    drawSleeper(166, 234);
+    drawSleeper(408, 122);
+  }
+
+  // 荷叶：扁圆带一个缺口
+  function drawPad(cx, cy, r) {
+    ink(function () {
+      ctx.moveTo(cx, cy - r * 0.64);
+      ctx.quadraticCurveTo(cx + r, cy - r * 0.52, cx + r * 0.86, cy + r * 0.3);
+      ctx.quadraticCurveTo(cx, cy + r * 0.92, cx - r * 0.86, cy + r * 0.3);
+      ctx.quadraticCurveTo(cx - r, cy - r * 0.52, cx, cy - r * 0.64);
+      ctx.closePath();
+    }, '#3e5a36', 1.8);
+    // 叶脉
+    ctx.strokeStyle = 'rgba(24,38,22,0.6)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.6);
+    ctx.lineTo(cx + r * 0.08, cy + r * 0.25);
+    ctx.stroke();
+  }
+
+  // 莲花：五片花瓣 + 金黄花心
+  function drawBloom(cx, cy, s) {
+    for (let i = 0; i < 5; i++) {
+      const a = -Math.PI / 2 + (i - 2) * 0.6;
+      const px = cx + Math.cos(a) * 4.2 * s;
+      const py = cy + Math.sin(a) * 4.2 * s;
+      ink(function () {
+        ctx.ellipse(px, py, 3.1 * s, 4.6 * s, a + Math.PI / 2, 0, 6.3);
+      }, i % 2 ? LOTUS_PINK : '#f2c2d0', 1.3);
+    }
+    ctx.fillStyle = LOTUS_Y;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 2.1 * s, 0, 6.3);
+    ctx.fill();
+  }
+
+  // 睡倒的人：横躺的一团，头顶还开着花
+  function drawSleeper(cx, cy) {
+    shadow(cx, cy + 2, 19, 5, 0.22);
+    ink(function () {
+      ctx.moveTo(cx - 18, cy + 2);
+      ctx.quadraticCurveTo(cx - 22, cy - 8, cx - 10, cy - 9);
+      ctx.quadraticCurveTo(cx + 6, cy - 10, cx + 14, cy - 4);
+      ctx.quadraticCurveTo(cx + 20, cy + 1, cx + 12, cy + 4);
+      ctx.quadraticCurveTo(cx - 4, cy + 6, cx - 18, cy + 2);
+      ctx.closePath();
+    }, '#8a8262', 2.2);
+    // 头
+    ink(function () { ctx.ellipse(cx - 18, cy - 5, 6.4, 6, -0.3, 0, 6.3); }, LOTUS_SKIN, 2);
+    // 闭着的眼
+    ctx.strokeStyle = '#4a5a46';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.arc(cx - 19.4, cy - 5, 2, 0.4, 2.7);
+    ctx.stroke();
+    // 头顶的莲花
+    drawBloom(cx - 18, cy - 12, 0.58);
+  }
+
+  /* ── 第一幕边界：远海 + 木栅栏 + 沙丘 ─────────── */
+  function drawCampWalls() {
+    const T = 42, S = 18, B = 16;
+
+    /* 顶部远海 */
+    ctx.fillStyle = SEA_D;
+    ctx.fillRect(0, 0, W, T);
+    const sg = ctx.createLinearGradient(0, 0, 0, T);
+    sg.addColorStop(0, 'rgba(16,30,36,0.85)');
+    sg.addColorStop(0.5, 'rgba(44,74,82,0.10)');
+    sg.addColorStop(1, 'rgba(126,166,160,0.26)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(0, 0, W, T);
+
+    // 浪线：三道缓慢起伏的白线
+    for (let k = 0; k < 3; k++) {
+      ctx.strokeStyle = 'rgba(211,226,220,' + (0.26 - k * 0.06).toFixed(2) + ')';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 6) {
+        const yy = 7 + k * 9 + Math.sin(x * 0.045 + t * 1.1 + k * 2.1) * 1.7;
+        if (x === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
+      }
+      ctx.stroke();
+    }
+
+    // 拍岸泡沫：贴着沙滩的断续白边
+    for (let i = 0; i < 24; i++) {
+      const x = i * 21 + jit(i * 2.1) * 14;
+      const w = 9 + jit(i * 2.1 + 1) * 15;
+      const a = 0.24 + jit(i * 2.1 + 2) * 0.32;
+      blobPath(x, T - 3 + Math.sin(t * 1.4 + i * 0.8) * 1.3, w * 0.5, 2.3, i * 5.3, 5, 0.3);
+      ctx.fillStyle = 'rgba(228,240,234,' + a.toFixed(2) + ')';
+      ctx.fill();
+    }
+
+    // 湿沙：海岸线附近的沙色被压暗压冷
+    const wg = ctx.createLinearGradient(0, T - 5, 0, T + 20);
+    wg.addColorStop(0, 'rgba(66,80,74,0.45)');
+    wg.addColorStop(1, 'rgba(66,80,74,0)');
+    ctx.fillStyle = wg;
+    ctx.fillRect(0, T - 5, W, 25);
+
+    /* 左右木栅栏 */
+    for (let side = 0; side < 2; side++) {
+      const baseX = side ? W - S + 9 : S - 9;
+
+      // 栅栏落在地面的阴影
+      const g2 = ctx.createLinearGradient(side ? W - S - 15 : S + 15, 0, side ? W - S : S, 0);
+      g2.addColorStop(0, 'rgba(48,34,22,0)');
+      g2.addColorStop(1, 'rgba(48,34,22,0.40)');
+      ctx.fillStyle = g2;
+      ctx.fillRect(side ? W - S - 15 : S, T, 15, H - T - B);
+
+      for (let i = 0; i < 7; i++) {
+        const s = side * 41 + i * 6.9;
+        const px = baseX + sj(s) * 2;
+        const py = T + 10 + i * 32 + sj(s + 1) * 3;
+        // 削尖的木桩
+        ink(function () {
+          ctx.moveTo(px - 3.8, py - 5);
+          ctx.lineTo(px, py - 13);
+          ctx.lineTo(px + 3.8, py - 5);
+          ctx.lineTo(px + 3.4, py + 10);
+          ctx.lineTo(px - 3.4, py + 10);
+          ctx.closePath();
+        }, i % 2 ? WOOD : '#5d4028', 1.8);
+        // 桩面受光
+        ctx.fillStyle = 'rgba(186,146,100,0.26)';
+        ctx.fillRect(px - 2.6, py - 4, 1.7, 12);
+      }
+
+      // 横木：手绘抖动，压在桩外侧
+      const bx = side ? W - S + 12 : S - 12;
+      ctx.strokeStyle = WOOD_D;
+      ctx.lineWidth = 2.6;
+      roughPath(bx, T + 2, bx + sj(side * 3) * 2, H - B - 2, side * 17 + 5, 1.6);
+      ctx.stroke();
+    }
+
+    /* 底部沙丘 */
+    ctx.fillStyle = SAND_D;
+    ctx.fillRect(0, H - B, W, B);
+    for (let i = -1; i < 16; i++) {
+      const s = 80 + i * 5.7;
+      const cx = i * 32 + 16 + sj(s) * 3;
+      const cy = H - B + 6;
+      blobPath(cx, cy, 19 + jit(s + 2) * 6, 9 + jit(s + 3) * 3, s, 6, 0.14);
+      ctx.fillStyle = i % 2 ? SAND_D : '#7d6746';
+      ctx.fill();
+      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = 'rgba(58,44,28,0.65)';
+      ctx.stroke();
+      if (i % 3 === 0) innerLight(cx - 4, cy - 4, 9, 3.4, '#d8bd8c', 0.14);
+    }
+    const bg = ctx.createLinearGradient(0, H - B - 16, 0, H - B);
+    bg.addColorStop(0, 'rgba(56,42,28,0)');
+    bg.addColorStop(1, 'rgba(56,42,28,0.42)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, H - B - 16, W, 16);
+
+    // 沙丘上零星的草
+    for (let i = 0; i < 7; i++) {
+      const gx = 34 + jit(i * 11.3) * (W - 68);
+      const gy = H - B + 2;
+      ctx.strokeStyle = 'rgba(94,110,62,0.75)';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      for (let b = -1; b <= 1; b++) {
+        ctx.moveTo(gx, gy);
+        ctx.quadraticCurveTo(gx + b * 2.6, gy - 5, gx + b * 4.4 + sj(i + b) * 1.2, gy - 9);
+      }
+      ctx.stroke();
+    }
+
+    /* 栈桥：伸进海里的木跳板，作为上方的出口 */
+    const px2 = W / 2;
+    ink(function () {
+      ctx.moveTo(px2 - 15, T + 7);
+      ctx.lineTo(px2 + 15, T + 7);
+      ctx.lineTo(px2 + 11, -3);
+      ctx.lineTo(px2 - 11, -3);
+      ctx.closePath();
+    }, WOOD, 2.2);
+    ctx.strokeStyle = 'rgba(40,28,18,0.75)';
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(px2 - 13 + i * 0.7, T + 4 - i * 9);
+      ctx.lineTo(px2 + 13 - i * 0.7, T + 4 - i * 9);
+      ctx.stroke();
+    }
+
+    // 内沿硬边：明确可走区域
+    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = 'rgba(58,44,28,0.55)';
+    ctx.beginPath();
+    ctx.moveTo(S - 2, T);
+    ctx.lineTo(W - S + 2, T);
+    ctx.lineTo(W - S + 2, H - B);
+    ctx.lineTo(S - 2, H - B);
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  /* ── 第二幕地面：泥地与莲池 ──────────────────── */
+  function drawLotusGround() {
+    ctx.fillStyle = MUD;
+    ctx.fillRect(0, 0, W, H);
+
+    // 泥地明暗
+    for (let i = 0; i < 30; i++) {
+      const cx = jit(i * 4.3) * W;
+      const cy = jit(i * 4.3 + 1) * H;
+      const rx = 34 + jit(i * 4.3 + 2) * 54;
+      const ry = 22 + jit(i * 4.3 + 3) * 32;
+      blobPath(cx, cy, rx, ry, i * 7.9, 8, 0.26);
+      ctx.fillStyle = i % 3 === 0 ? 'rgba(96,110,68,0.20)' : 'rgba(40,50,32,0.22)';
+      ctx.fill();
+    }
+
+    // 莲池：三块不规则水面
+    const ponds = [
+      [96, 92, 54, 26, 11],
+      [356, 198, 62, 30, 23],
+      [214, 238, 48, 22, 37]
+    ];
+    for (let p = 0; p < ponds.length; p++) {
+      const cx = ponds[p][0], cy = ponds[p][1];
+      const rx = ponds[p][2], ry = ponds[p][3], seed = ponds[p][4];
+      blobPath(cx, cy, rx, ry, seed, 8, 0.28);
+      ctx.fillStyle = POND;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(26,36,32,0.55)';
+      ctx.stroke();
+
+      // 水面反光：裁剪在水面内画几道弧
+      ctx.save();
+      ctx.beginPath();
+      blobPath(cx, cy, rx, ry, seed, 8, 0.28);
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(126,158,152,0.32)';
+      ctx.lineWidth = 2;
+      for (let k = 0; k < 3; k++) {
+        const yy = cy - ry * 0.42 + k * 7;
+        ctx.beginPath();
+        ctx.moveTo(cx - rx * 0.5, yy);
+        ctx.quadraticCurveTo(cx, yy - 2.6, cx + rx * 0.4, yy + 1);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 泥粒
+    for (let i = 0; i < 380; i++) {
+      const x = jit(i * 1.9 + 7) * W;
+      const y = jit(i * 2.7 + 17) * H;
+      const r = 0.7 + jit(i * 3.3) * 1.1;
+      ctx.fillStyle = jit(i * 5.9) > 0.5 ? 'rgba(120,134,88,0.32)' : 'rgba(34,42,28,0.34)';
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 6.3);
+      ctx.fill();
+    }
+
+    // 草叶
+    for (let i = 0; i < 14; i++) {
+      const gx = 24 + jit(i * 9.7) * (W - 48);
+      const gy = 52 + jit(i * 9.7 + 1) * (H - 96);
+      ctx.strokeStyle = 'rgba(126,146,88,0.55)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let b = -1; b <= 1; b++) {
+        ctx.moveTo(gx, gy);
+        ctx.quadraticCurveTo(gx + b * 2.4, gy - 4.6, gx + b * 4.2 + sj(i + b) * 1.2, gy - 8);
+      }
+      ctx.stroke();
+    }
+
+    // 落在地上的花瓣
+    for (let i = 0; i < 9; i++) {
+      const x = 30 + jit(i * 6.1) * (W - 60);
+      const y = 48 + jit(i * 6.1 + 1) * (H - 88);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(sj(i * 6.1) * 1.2);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 3.2, 1.8, 0, 0, 6.3);
+      ctx.fillStyle = i % 3 ? 'rgba(232,168,189,0.5)' : 'rgba(196,115,143,0.45)';
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  /* ── 第二幕边界：林缘、芦苇、水岸 ─────────────── */
+  function drawLotusEdge() {
+    const T = 42, S = 18, B = 18;
+
+    // 上方林缘：两层树冠
+    ctx.fillStyle = '#1a2414';
+    ctx.fillRect(0, 0, W, T);
+    for (let row = 0; row < 2; row++) {
+      const yy = 10 + row * 16;
+      for (let i = -1; i < 15; i++) {
+        const s = row * 53 + i * 7.1;
+        const cx = i * 34 + 17 + sj(s) * 5;
+        const cy = yy + sj(s + 1) * 3;
+        blobPath(cx, cy, 20 + jit(s + 2) * 6, 11 + jit(s + 3) * 4, s, 7, 0.2);
+        ctx.fillStyle = row === 0 ? TREE : TREE_L;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(12,18,10,0.85)';
+        ctx.stroke();
+        if (row === 0) innerLight(cx - 6, cy - 5, 10, 3.6, '#8fa868', 0.14);
+      }
+    }
+    // 林缘投影
+    const sg = ctx.createLinearGradient(0, T, 0, T + 22);
+    sg.addColorStop(0, 'rgba(12,18,10,0.5)');
+    sg.addColorStop(1, 'rgba(12,18,10,0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(0, T - 2, W, 24);
+
+    // 左右：灌木团 + 芦苇
+    for (let side = 0; side < 2; side++) {
+      const g2 = ctx.createLinearGradient(side ? W - S - 16 : S + 16, 0, side ? W - S : S, 0);
+      g2.addColorStop(0, 'rgba(12,18,10,0)');
+      g2.addColorStop(1, 'rgba(12,18,10,0.35)');
+      ctx.fillStyle = g2;
+      ctx.fillRect(side ? W - S - 16 : S, T, 16, H - T - B);
+
+      // 灌木
+      for (let i = 0; i < 7; i++) {
+        const s = side * 61 + i * 8.3;
+        const cx = (side ? W - S + 8 : S - 8) + sj(s) * 4;
+        const cy = T + 14 + i * 30 + sj(s + 1) * 5;
+        blobPath(cx, cy, 9 + jit(s + 2) * 4, 10 + jit(s + 3) * 4, s, 6, 0.22);
+        ctx.fillStyle = i % 2 ? TREE : TREE_L;
+        ctx.fill();
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = 'rgba(12,18,10,0.8)';
+        ctx.stroke();
+      }
+      // 芦苇：细杆随手摆动
+      for (let i = 0; i < 5; i++) {
+        const s = side * 37 + i * 9.1;
+        const bx = (side ? W - S + 13 : S - 13) + sj(s) * 2;
+        const topY = T + 24 + i * 38 + sj(s + 1) * 4;
+        const sway = Math.sin(t * 1.6 + i) * 2.4;
+        ctx.strokeStyle = REED;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(bx, topY + 22);
+        ctx.quadraticCurveTo(bx + sway, topY, bx + sway * 1.6, topY - 20);
+        ctx.stroke();
+      }
+    }
+
+    // 底部水岸
+    ctx.fillStyle = '#33402a';
+    ctx.fillRect(0, H - B, W, B);
+    for (let i = -1; i < 16; i++) {
+      const s = 90 + i * 5.3;
+      const cx = i * 32 + 16 + sj(s) * 3;
+      const cy = H - B + 7;
+      blobPath(cx, cy, 19 + jit(s + 2) * 5, 9 + jit(s + 3) * 3, s, 6, 0.2);
+      ctx.fillStyle = i % 2 ? '#3c4a30' : '#46563a';
+      ctx.fill();
+      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = 'rgba(20,28,16,0.7)';
+      ctx.stroke();
+    }
+    const bg = ctx.createLinearGradient(0, H - B - 16, 0, H - B);
+    bg.addColorStop(0, 'rgba(20,28,16,0)');
+    bg.addColorStop(1, 'rgba(20,28,16,0.42)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, H - B - 16, W, 16);
+
+    // 上方中央的小径
+    const px = W / 2;
+    ctx.fillStyle = '#4a5638';
+    ctx.beginPath();
+    ctx.moveTo(px - 21, T + 7);
+    ctx.lineTo(px + 21, T + 7);
+    ctx.lineTo(px + 15, -4);
+    ctx.lineTo(px - 15, -4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(24,32,18,0.75)';
+    ctx.stroke();
+
+    // 内沿硬边
+    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = 'rgba(22,30,18,0.55)';
+    ctx.beginPath();
+    ctx.moveTo(S - 2, T);
+    ctx.lineTo(W - S + 2, T);
+    ctx.lineTo(W - S + 2, H - B);
+    ctx.lineTo(S - 2, H - B);
+    ctx.closePath();
+    ctx.stroke();
   }
 
   /* ── 岩壁 ────────────────────────────────────── */
@@ -416,253 +1141,392 @@
     ctx.fillRect(x - 50, by - 78, 100, 96);
     ctx.restore();
 
-    // 深红披风（身后，随风飘）
+    // 深红披风：从双肩包到膝上，是整个人物的外层轮廓
     const sway = Math.sin(t * 2.7) * 2;
     ink(function () {
-      ctx.moveTo(x - 4, by - 38);
-      ctx.quadraticCurveTo(x - 15, by - 38, x - 20 + sway, by - 20);
-      ctx.quadraticCurveTo(x - 23 + sway, by - 4, x - 18 + sway, by + 2);
-      ctx.quadraticCurveTo(x - 12, by - 2, x - 5, by - 1);
+      ctx.moveTo(x - 11.4, by - 43);
+      ctx.quadraticCurveTo(x - 20.5 + sway * 0.6, by - 34, x - 20 + sway, by - 12);
+      ctx.quadraticCurveTo(x - 19.4 + sway, by - 6.4, x - 12.6 + sway, by - 5);
+      ctx.quadraticCurveTo(x, by - 3.2, x + 12.6 + sway * 0.5, by - 5);
+      ctx.quadraticCurveTo(x + 19.4 + sway * 0.5, by - 6.4, x + 20 + sway * 0.5, by - 12);
+      ctx.quadraticCurveTo(x + 20.5 + sway * 0.5, by - 34, x + 11.4, by - 43);
       ctx.closePath();
     }, CAPE, 2.6);
-    // 披风内折
-    ctx.strokeStyle = 'rgba(60,18,14,0.6)';
+    // 披风折痕
+    ctx.strokeStyle = 'rgba(58,18,14,0.5)';
     ctx.lineWidth = 1.4;
     ctx.beginPath();
-    ctx.moveTo(x - 6, by - 34);
-    ctx.quadraticCurveTo(x - 13 + sway * 0.6, by - 22, x - 15 + sway, by - 2);
+    ctx.moveTo(x - 13.6 + sway * 0.4, by - 40);
+    ctx.quadraticCurveTo(x - 16.4 + sway, by - 24, x - 15.4 + sway, by - 7);
+    ctx.moveTo(x + 13.6 + sway * 0.3, by - 40);
+    ctx.quadraticCurveTo(x + 16.4 + sway * 0.5, by - 24, x + 15.4 + sway * 0.5, by - 7);
     ctx.stroke();
 
-    // 腿：短粗
-    ink(function () {
-      ctx.moveTo(x - 9, by - 20);
-      ctx.lineTo(x - 2.6, by - 20);
-      ctx.lineTo(x - 2.8, by - 6);
-      ctx.lineTo(x - 9.6, by - 6);
-      ctx.closePath();
-    }, '#4a3d2e', 2.4);
-    ink(function () {
-      ctx.moveTo(x + 2.6, by - 20);
-      ctx.lineTo(x + 9, by - 20);
-      ctx.lineTo(x + 9.6, by - 6);
-      ctx.lineTo(x + 2.8, by - 6);
-      ctx.closePath();
-    }, '#4a3d2e', 2.4);
-    // 靴：厚底
-    ink(function () {
-      ctx.moveTo(x - 10, by - 6);
-      ctx.lineTo(x - 2.5, by - 6);
-      ctx.quadraticCurveTo(x - 2.5, by + 1.5, x - 5.5, by + 1.5);
-      ctx.quadraticCurveTo(x - 10, by + 1.5, x - 10.5, by - 4);
-      ctx.closePath();
-    }, '#1e1813', 2.2);
-    ink(function () {
-      ctx.moveTo(x + 10, by - 6);
-      ctx.lineTo(x + 2.5, by - 6);
-      ctx.quadraticCurveTo(x + 2.5, by + 1.5, x + 5.5, by + 1.5);
-      ctx.quadraticCurveTo(x + 10, by + 1.5, x + 10.5, by - 4);
-      ctx.closePath();
-    }, '#1e1813', 2.2);
-
-    // 躯干：暗橄榄色的旧甲，宽而短
-    ink(function () {
-      ctx.moveTo(x - 13.5, by - 34);
-      ctx.quadraticCurveTo(x, by - 38, x + 13.5, by - 34);
-      ctx.lineTo(x + 11, by - 20);
-      ctx.quadraticCurveTo(x, by - 17, x - 11, by - 20);
-      ctx.closePath();
-    }, ARMOR, 2.8);
-    // 左侧火光反光
-    innerLight(x - 5, by - 30, 5.5, 4, '#cfd0ab', 0.20);
-    // 两条皮革背带
-    ctx.strokeStyle = 'rgba(52,36,24,0.9)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(x - 7.8, by - 34.6);
-    ctx.lineTo(x - 5.2, by - 20);
-    ctx.moveTo(x + 7.8, by - 34.6);
-    ctx.lineTo(x + 5.2, by - 20);
-    ctx.stroke();
-    // 胸口圆扣
-    ctx.fillStyle = TRIM;
-    ctx.beginPath();
-    ctx.arc(x, by - 27, 2.6, 0, 6.3);
-    ctx.fill();
-    ctx.lineWidth = 1.4;
-    ctx.strokeStyle = INK;
-    ctx.stroke();
-
-    // 腰带
-    ink(function () { ctx.rect(x - 11.5, by - 22, 23, 4); }, '#4a3524', 2);
-    ctx.fillStyle = TRIM;
-    ctx.fillRect(x - 2.4, by - 21.6, 4.8, 3.2);
-
-    // 左臂：短粗
-    ink(function () {
-      ctx.moveTo(x - 11, by - 33);
-      ctx.lineTo(x - 15.5, by - 21);
-      ctx.lineTo(x - 11.5, by - 19.5);
-      ctx.lineTo(x - 8, by - 30);
-      ctx.closePath();
-    }, SKIN, 2.4);
-
-    // 弓：短一点，收在身侧
+    // 弓：斜背在身后，两端从轮廓外露出
     ctx.strokeStyle = INK;
     ctx.lineWidth = 4.6;
     ctx.beginPath();
-    ctx.moveTo(x - 16, by - 44);
-    ctx.quadraticCurveTo(x - 24, by - 29, x - 16, by - 14);
+    ctx.moveTo(x - 14, by - 46);
+    ctx.quadraticCurveTo(x + 21, by - 28, x + 13.5, by - 12);
     ctx.stroke();
-    ctx.strokeStyle = '#8a5f34';
+    ctx.strokeStyle = '#a57440';
     ctx.lineWidth = 2.6;
     ctx.stroke();
-    // 弦
-    ctx.strokeStyle = '#f2e7ce';
-    ctx.lineWidth = 0.9;
+
+    // 箭袋：右腰后，露三支箭羽
+    ink(function () {
+      ctx.moveTo(x + 12.4, by - 20);
+      ctx.lineTo(x + 16.4, by - 18.6);
+      ctx.quadraticCurveTo(x + 16.7, by - 12.4, x + 14.4, by - 9);
+      ctx.lineTo(x + 11.4, by - 10.6);
+      ctx.closePath();
+    }, '#4a3524', 1.8);
+    for (let a = 0; a < 3; a++) {
+      const ax = x + 13.6 + a * 1.6, ay = by - 22.4 - a * 0.7;
+      ink(function () {
+        ctx.moveTo(ax - 1.1, ay + 2);
+        ctx.lineTo(ax, ay - 1.6);
+        ctx.lineTo(ax + 1.1, ay + 2);
+        ctx.closePath();
+      }, BONE, 1.1);
+    }
+
+    /* 身体剪影：颈、肩、手臂、腰、腿、靴一次成型。
+       内部不再各自描黑边，这是"整体感"的关键 */
+    function bodyPath() {
+      ctx.moveTo(x - 4.2, by - 46);
+      ctx.quadraticCurveTo(x - 8.8, by - 45.6, x - 11.8, by - 41.6);
+      ctx.quadraticCurveTo(x - 14, by - 38.6, x - 14, by - 32);
+      ctx.quadraticCurveTo(x - 14, by - 24, x - 13.4, by - 20);
+      ctx.quadraticCurveTo(x - 12.8, by - 17.6, x - 11.8, by - 16.6);
+      ctx.quadraticCurveTo(x - 10.8, by - 16.2, x - 10.3, by - 17.4);
+      ctx.quadraticCurveTo(x - 10.2, by - 22, x - 10.4, by - 26.5);
+      ctx.quadraticCurveTo(x - 10.6, by - 23, x - 10.4, by - 21.4);
+      ctx.quadraticCurveTo(x - 10, by - 19, x - 10.8, by - 18);
+      ctx.quadraticCurveTo(x - 9.8, by - 14, x - 9.2, by - 8);
+      ctx.quadraticCurveTo(x - 9.4, by - 6.4, x - 10.1, by - 5.2);
+      ctx.quadraticCurveTo(x - 9.8, by + 1.4, x - 5.8, by + 1.5);
+      ctx.quadraticCurveTo(x - 3.3, by + 1.4, x - 2.9, by - 1.4);
+      ctx.quadraticCurveTo(x - 2.5, by - 4.6, x, by - 8);
+      ctx.quadraticCurveTo(x + 2.5, by - 4.6, x + 2.9, by - 1.4);
+      ctx.quadraticCurveTo(x + 3.3, by + 1.4, x + 5.8, by + 1.5);
+      ctx.quadraticCurveTo(x + 9.8, by + 1.4, x + 10.1, by - 5.2);
+      ctx.quadraticCurveTo(x + 9.4, by - 6.4, x + 9.2, by - 8);
+      ctx.quadraticCurveTo(x + 9.8, by - 14, x + 10.8, by - 18);
+      ctx.quadraticCurveTo(x + 10, by - 19, x + 10.4, by - 21.4);
+      ctx.quadraticCurveTo(x + 10.6, by - 23, x + 10.4, by - 26.5);
+      ctx.quadraticCurveTo(x + 10.2, by - 22, x + 10.3, by - 17.4);
+      ctx.quadraticCurveTo(x + 10.8, by - 16.2, x + 11.8, by - 16.6);
+      ctx.quadraticCurveTo(x + 12.8, by - 17.6, x + 13.4, by - 20);
+      ctx.quadraticCurveTo(x + 14, by - 24, x + 14, by - 32);
+      ctx.quadraticCurveTo(x + 14, by - 38.6, x + 11.8, by - 41.6);
+      ctx.quadraticCurveTo(x + 8.8, by - 45.6, x + 4.2, by - 46);
+      ctx.quadraticCurveTo(x, by - 46.6, x - 4.2, by - 46);
+      ctx.closePath();
+    }
     ctx.beginPath();
-    ctx.moveTo(x - 16, by - 44);
-    ctx.lineTo(x - 16, by - 14);
+    bodyPath();
+    ctx.fillStyle = ARMOR;
+    ctx.fill();
+    ctx.lineWidth = 2.8;
+    ctx.strokeStyle = INK;
     ctx.stroke();
 
-    // 脸：宽，下颌收一点
+    /* 剪影内部：手臂、裤腿、靴各归其位，共用一条外轮廓 */
+    ctx.save();
+    ctx.beginPath();
+    bodyPath();
+    ctx.clip();
+
+    // 双臂：肩甲下露出的一段皮肤，上臂圆、前臂收
+    for (let s = -1; s <= 1; s += 2) {
+      ctx.beginPath();
+      ctx.moveTo(x + s * 11.8, by - 40);
+      ctx.quadraticCurveTo(x + s * 14, by - 34, x + s * 13.6, by - 28);
+      ctx.quadraticCurveTo(x + s * 13, by - 21, x + s * 11.8, by - 17.6);
+      ctx.lineTo(x + s * 10.2, by - 17.6);
+      ctx.quadraticCurveTo(x + s * 10.4, by - 26, x + s * 10.6, by - 34);
+      ctx.closePath();
+      ctx.fillStyle = SKIN;
+      ctx.fill();
+      // 手掌：让手臂有个收尾
+      ctx.beginPath();
+      ctx.ellipse(x + s * 11.2, by - 17.2, 2.3, 2.1, 0, 0, 6.3);
+      ctx.fill();
+      // 手臂内侧的暗部，让它有圆柱感
+      ctx.strokeStyle = 'rgba(122,70,48,0.26)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + s * 11, by - 36);
+      ctx.lineTo(x + s * 11, by - 20);
+      ctx.stroke();
+    }
+
+    // 裤腿
+    ctx.fillStyle = '#3a2f24';
+    ctx.fillRect(x - 9.8, by - 18, 6.8, 12.4);
+    ctx.fillRect(x + 3, by - 18, 6.8, 12.4);
+    // 靴
+    ctx.fillStyle = '#1e1813';
+    ctx.fillRect(x - 10.4, by - 5.4, 7.8, 7.2);
+    ctx.fillRect(x + 2.6, by - 5.4, 7.8, 7.2);
+
+    // 侧面明暗：左亮右暗，让扁平剪影立起来
+    const shade = ctx.createLinearGradient(x - 14, 0, x + 14, 0);
+    shade.addColorStop(0, 'rgba(255,238,196,0.12)');
+    shade.addColorStop(0.42, 'rgba(0,0,0,0)');
+    shade.addColorStop(1, 'rgba(0,0,0,0.24)');
+    ctx.fillStyle = shade;
+    ctx.fillRect(x - 15, by - 47, 30, 49);
+
+    // 胸板：迈锡尼青铜，压在甲面上
+    ctx.beginPath();
+    ctx.moveTo(x - 9, by - 40.6);
+    ctx.quadraticCurveTo(x, by - 43.4, x + 9, by - 40.6);
+    ctx.lineTo(x + 7.2, by - 26);
+    ctx.quadraticCurveTo(x, by - 23, x - 7.2, by - 26);
+    ctx.closePath();
+    ctx.fillStyle = '#6a6e50';
+    ctx.fill();
+    ctx.lineWidth = 1.7;
+    ctx.strokeStyle = 'rgba(24,26,18,0.5)';
+    ctx.stroke();
+    // 胸板受光
+    ctx.fillStyle = 'rgba(216,222,171,0.30)';
+    ctx.beginPath();
+    ctx.ellipse(x - 3.8, by - 35, 5, 3.8, -0.3, 0, 6.3);
+    ctx.fill();
+
+    // 两条皮革背带，从肩压到腰
+    ctx.strokeStyle = 'rgba(46,32,20,0.85)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - 7.4, by - 41);
+    ctx.lineTo(x - 7, by - 26);
+    ctx.moveTo(x + 7.4, by - 41);
+    ctx.lineTo(x + 7, by - 26);
+    ctx.stroke();
+
+    // 腰带
+    ctx.fillStyle = '#4a3524';
+    ctx.fillRect(x - 11.2, by - 21.6, 22.4, 3.6);
+    ctx.fillStyle = TRIM;
+    ctx.fillRect(x - 2.4, by - 21.2, 4.8, 2.8);
+
+    // 皮条裙：pteruges，随步伐轻摆
+    for (let i = -2; i <= 2; i++) {
+      const px = x + i * 4.4;
+      const lean = i * 0.7 + Math.sin(t * 2.2 + i * 1.7) * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(px - 2.1, by - 18);
+      ctx.quadraticCurveTo(px - 2.4 + lean, by - 14.5, px - 1.8 + lean, by - 11.2);
+      ctx.lineTo(px + 1.8 + lean, by - 11.2);
+      ctx.quadraticCurveTo(px + 2.4 + lean, by - 14.5, px + 2.1, by - 18);
+      ctx.closePath();
+      ctx.fillStyle = LEATHER;
+      ctx.fill();
+      ctx.lineWidth = 1.3;
+      ctx.strokeStyle = 'rgba(38,26,16,0.65)';
+      ctx.stroke();
+    }
+
+    // 护胫：青铜
+    for (let s = -1; s <= 1; s += 2) {
+      ctx.beginPath();
+      ctx.moveTo(x + s * 9.6, by - 10.8);
+      ctx.quadraticCurveTo(x + s * 6.4, by - 11.8, x + s * 3.2, by - 10.8);
+      ctx.lineTo(x + s * 3.4, by - 5.4);
+      ctx.lineTo(x + s * 9.8, by - 5.4);
+      ctx.closePath();
+      ctx.fillStyle = '#5c5f48';
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(24,26,18,0.55)';
+      ctx.stroke();
+    }
+
+    ctx.restore();   // 结束剪影内的绘制
+
+    // 肩甲：压住手臂与躯干的接缝
+    for (let s = -1; s <= 1; s += 2) {
+      ink(function () {
+        ctx.ellipse(x + s * 11.2, by - 40.4, 5.2, 4.2, s * 0.26, 0, 6.3);
+      }, '#5c5f48', 2.2);
+      ctx.strokeStyle = 'rgba(216,222,182,0.45)';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(x + s * 11.2, by - 40.4, 3.2, s > 0 ? -2.1 : -2.7, s > 0 ? -0.6 : -1.2);
+      ctx.stroke();
+    }
+    // 左肩的披风扣
+    ctx.fillStyle = TRIM;
+    ctx.beginPath();
+    ctx.arc(x - 11.2, by - 40.4, 1.3, 0, 6.3);
+    ctx.fill();
+    ctx.lineWidth = 0.9;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+
+    /* 头部：脸、须、盔、牙排，作为一个整体 */
+    // 脸
     ink(function () {
-      ctx.moveTo(x - 10, by - 52);
-      ctx.quadraticCurveTo(x - 10.6, by - 58, x, by - 58.6);
-      ctx.quadraticCurveTo(x + 10.6, by - 58, x + 10, by - 52);
-      ctx.quadraticCurveTo(x + 10, by - 42, x + 6, by - 38.4);
-      ctx.quadraticCurveTo(x, by - 36.4, x - 6, by - 38.4);
-      ctx.quadraticCurveTo(x - 10, by - 42, x - 10, by - 52);
+      ctx.moveTo(x - 9.4, by - 50.4);
+      ctx.quadraticCurveTo(x - 9.9, by - 59.6, x, by - 60.4);
+      ctx.quadraticCurveTo(x + 9.9, by - 59.6, x + 9.4, by - 50.4);
+      ctx.quadraticCurveTo(x + 9, by - 44.8, x + 5.4, by - 43);
+      ctx.quadraticCurveTo(x, by - 42, x - 5.4, by - 43);
+      ctx.quadraticCurveTo(x - 9, by - 44.8, x - 9.4, by - 50.4);
       ctx.closePath();
     }, SKIN, 2.6);
-    innerLight(x - 4, by - 53, 4.6, 4, '#f7d9b4', 0.26);
-
+    innerLight(x - 4, by - 55, 4.4, 3.8, '#f7d9b4', 0.26);
     // 右脸阴影
     ctx.save();
     ctx.globalAlpha = 0.15;
     ctx.fillStyle = '#7a4630';
     ctx.beginPath();
-    ctx.ellipse(x + 8, by - 47, 3, 6, 0.1, 0, 6.3);
+    ctx.ellipse(x + 7.6, by - 49.6, 2.8, 5.6, 0.1, 0, 6.3);
     ctx.fill();
     ctx.restore();
 
-    // 眉：粗，压低
-    ctx.strokeStyle = '#3f2415';
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
-    ctx.moveTo(x - 7, by - 50);
-    ctx.lineTo(x - 1.8, by - 51.6);
-    ctx.moveTo(x + 7, by - 50);
-    ctx.lineTo(x + 1.8, by - 51.6);
-    ctx.stroke();
-
-    // 眼
+    // 眼：藏在眼窗里
     ctx.fillStyle = '#f3e7cd';
     ctx.beginPath();
-    ctx.ellipse(x - 4.2, by - 47.4, 2.8, 2.8, 0, 0, 6.3);
-    ctx.ellipse(x + 4.2, by - 47.4, 2.8, 2.8, 0, 0, 6.3);
+    ctx.ellipse(x - 4, by - 48.6, 2.7, 2.7, 0, 0, 6.3);
+    ctx.ellipse(x + 4, by - 48.6, 2.7, 2.7, 0, 0, 6.3);
     ctx.fill();
     ctx.fillStyle = '#2b3038';
     ctx.beginPath();
-    ctx.ellipse(x - 4.1, by - 47.4, 1.6, 1.8, 0, 0, 6.3);
-    ctx.ellipse(x + 4.3, by - 47.4, 1.6, 1.8, 0, 0, 6.3);
+    ctx.ellipse(x - 3.9, by - 48.6, 1.5, 1.7, 0, 0, 6.3);
+    ctx.ellipse(x + 4.1, by - 48.6, 1.5, 1.7, 0, 0, 6.3);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath();
+    ctx.arc(x - 4.6, by - 49.3, 0.7, 0, 6.3);
+    ctx.arc(x + 3.4, by - 49.3, 0.7, 0, 6.3);
     ctx.fill();
 
     // 鼻
     ctx.strokeStyle = 'rgba(148,84,56,0.85)';
     ctx.lineWidth = 1.3;
     ctx.beginPath();
-    ctx.moveTo(x + 1, by - 46);
-    ctx.lineTo(x + 0.4, by - 42.4);
-    ctx.lineTo(x + 2.4, by - 42);
+    ctx.moveTo(x + 0.9, by - 48);
+    ctx.lineTo(x + 0.4, by - 44.6);
+    ctx.lineTo(x + 2.2, by - 44.2);
     ctx.stroke();
 
-    // 胡须：包住下巴，两颊短一点
+    // 风霜红晕
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = '#c25b3a';
+    ctx.beginPath();
+    ctx.ellipse(x - 7, by - 47.6, 1.9, 1.1, 0, 0, 6.3);
+    ctx.ellipse(x + 7, by - 47.6, 1.9, 1.1, 0, 0, 6.3);
+    ctx.fill();
+    ctx.restore();
+
+    // 胡须
     ink(function () {
-      ctx.moveTo(x - 9.6, by - 44.6);
-      ctx.quadraticCurveTo(x - 11, by - 38.6, x - 6.4, by - 36);
-      ctx.quadraticCurveTo(x, by - 33.6, x + 6.4, by - 36);
-      ctx.quadraticCurveTo(x + 11, by - 38.6, x + 9.6, by - 44.6);
-      ctx.quadraticCurveTo(x + 7.6, by - 41.8, x + 4.4, by - 41.6);
-      ctx.lineTo(x + 3.8, by - 38.2);
-      ctx.quadraticCurveTo(x, by - 37.2, x - 3.8, by - 38.2);
-      ctx.lineTo(x - 4.4, by - 41.6);
-      ctx.quadraticCurveTo(x - 7.6, by - 41.8, x - 9.6, by - 44.6);
+      ctx.moveTo(x - 9, by - 46.4);
+      ctx.quadraticCurveTo(x - 10.4, by - 41, x - 6, by - 38.4);
+      ctx.quadraticCurveTo(x, by - 36, x + 6, by - 38.4);
+      ctx.quadraticCurveTo(x + 10.4, by - 41, x + 9, by - 46.4);
+      ctx.quadraticCurveTo(x + 7.2, by - 43.8, x + 4.2, by - 43.6);
+      ctx.lineTo(x + 3.6, by - 40.4);
+      ctx.quadraticCurveTo(x, by - 39.4, x - 3.6, by - 40.4);
+      ctx.lineTo(x - 4.2, by - 43.6);
+      ctx.quadraticCurveTo(x - 7.2, by - 43.8, x - 9, by - 46.4);
       ctx.closePath();
     }, '#4a3123', 2.4);
-    // 胡须纹理
+    // 须纹
     ctx.strokeStyle = 'rgba(30,20,12,0.4)';
     ctx.lineWidth = 1.1;
     ctx.beginPath();
-    ctx.moveTo(x - 6, by - 38.4);
-    ctx.lineTo(x - 3.4, by - 35.6);
-    ctx.moveTo(x + 6, by - 38.4);
-    ctx.lineTo(x + 3.4, by - 35.6);
-    ctx.moveTo(x, by - 37.4);
-    ctx.lineTo(x, by - 34.6);
+    ctx.moveTo(x - 5.6, by - 40.6);
+    ctx.lineTo(x - 3.2, by - 38);
+    ctx.moveTo(x + 5.6, by - 40.6);
+    ctx.lineTo(x + 3.2, by - 38);
+    ctx.moveTo(x, by - 39.6);
+    ctx.lineTo(x, by - 37);
     ctx.stroke();
-
-    // 嘴：胡子里的一条短横
+    // 嘴
     ctx.strokeStyle = 'rgba(90,40,30,0.95)';
     ctx.lineWidth = 1.4;
     ctx.beginPath();
-    ctx.moveTo(x - 3.2, by - 40);
-    ctx.lineTo(x + 3.2, by - 40);
+    ctx.moveTo(x - 3, by - 42);
+    ctx.lineTo(x + 3, by - 42);
     ctx.stroke();
-
-    // 上唇的两撇胡子
+    // 上唇胡
     ink(function () {
-      ctx.moveTo(x - 4.2, by - 41.6);
-      ctx.quadraticCurveTo(x - 1.6, by - 39.6, x, by - 41.4);
-      ctx.quadraticCurveTo(x + 1.6, by - 39.6, x + 4.2, by - 41.6);
-      ctx.quadraticCurveTo(x + 1.6, by - 42, x, by - 41.6);
-      ctx.quadraticCurveTo(x - 1.6, by - 42, x - 4.2, by - 41.6);
+      ctx.moveTo(x - 4, by - 43.6);
+      ctx.quadraticCurveTo(x - 1.5, by - 41.8, x, by - 43.4);
+      ctx.quadraticCurveTo(x + 1.5, by - 41.8, x + 4, by - 43.6);
+      ctx.quadraticCurveTo(x + 1.5, by - 44, x, by - 43.6);
+      ctx.quadraticCurveTo(x - 1.5, by - 44, x - 4, by - 43.6);
       ctx.closePath();
     }, '#4a3123', 1.8);
 
-    // 头盔：圆顶，露脸更多
+    // 盔：罩面，两侧护颊下探，只露眼窗
     ink(function () {
-      ctx.moveTo(x - 11.6, by - 55.5);
-      ctx.quadraticCurveTo(x - 12.6, by - 62.4, x, by - 63.2);
-      ctx.quadraticCurveTo(x + 12.6, by - 62.4, x + 11.6, by - 55.5);
-      ctx.quadraticCurveTo(x, by - 53.8, x - 11.6, by - 55.5);
+      ctx.moveTo(x - 11.2, by - 48.8);
+      ctx.quadraticCurveTo(x - 12.6, by - 59.6, x - 8.6, by - 63.6);
+      ctx.quadraticCurveTo(x, by - 67, x + 8.6, by - 63.6);
+      ctx.quadraticCurveTo(x + 12.6, by - 59.6, x + 11.2, by - 48.8);
+      ctx.quadraticCurveTo(x + 9, by - 46.8, x + 6.2, by - 50.8);
+      ctx.quadraticCurveTo(x, by - 52.6, x - 6.2, by - 50.8);
+      ctx.quadraticCurveTo(x - 9, by - 46.8, x - 11.2, by - 48.8);
       ctx.closePath();
     }, HELM, 2.8);
-    innerLight(x - 4, by - 59, 5.5, 3, '#cfc7a4', 0.34);
-
-    // 羽冠：一束马鬃，上缘被风吹出尖
-    ink(function () {
-      ctx.moveTo(x - 5.4, by - 62.4);
-      ctx.lineTo(x - 7 + sway, by - 68.4);
-      ctx.lineTo(x - 3.6 + sway, by - 67);
-      ctx.lineTo(x - 3.2 + sway, by - 71);
-      ctx.lineTo(x - 0.4 + sway, by - 67.8);
-      ctx.lineTo(x + 2.2 + sway * 0.8, by - 69.6);
-      ctx.lineTo(x + 3.8, by - 65.4);
-      ctx.lineTo(x + 5.4, by - 62.4);
-      ctx.closePath();
-    }, '#963f32', 2.4);
-    // 鬃毛纹理
-    ctx.strokeStyle = 'rgba(90,26,20,0.4)';
-    ctx.lineWidth = 1.1;
+    innerLight(x - 4, by - 60.4, 5.2, 2.8, '#cfc7a4', 0.34);
+    // 盔沿铆钉
+    ctx.fillStyle = TRIM;
     ctx.beginPath();
-    ctx.moveTo(x - 2.6, by - 63.4);
-    ctx.lineTo(x - 4.6 + sway * 0.6, by - 67.8);
-    ctx.moveTo(x + 0.8, by - 63.4);
-    ctx.lineTo(x - 0.6 + sway * 0.6, by - 67.8);
+    ctx.arc(x - 7.6, by - 57, 0.95, 0, 6.3);
+    ctx.arc(x, by - 55.6, 0.95, 0, 6.3);
+    ctx.arc(x + 7.6, by - 57, 0.95, 0, 6.3);
+    ctx.fill();
+    ctx.lineWidth = 0.9;
+    ctx.strokeStyle = INK;
     ctx.stroke();
 
-    // 肩甲：与甲同色，圆润
-    ink(function () { ctx.ellipse(x - 12, by - 33.5, 4.8, 3.8, -0.25, 0, 6.3); }, '#5c5f48', 2.2);
-    ink(function () { ctx.ellipse(x + 12, by - 33.5, 4.8, 3.8, 0.25, 0, 6.3); }, '#5c5f48', 2.2);
-
-    // 右臂：短粗
+    // 顶鬃结
     ink(function () {
-      ctx.moveTo(x + 10, by - 30);
-      ctx.lineTo(x + 14.5, by - 20);
-      ctx.lineTo(x + 11, by - 18.5);
-      ctx.lineTo(x + 7.5, by - 28);
+      ctx.moveTo(x - 2.5, by - 63.6);
+      ctx.quadraticCurveTo(x - 3.2 + sway, by - 67.4, x - 1.1 + sway, by - 68.8);
+      ctx.quadraticCurveTo(x + 0.6 + sway, by - 70, x + 1.9 + sway * 0.6, by - 67.6);
+      ctx.quadraticCurveTo(x + 3, by - 65.8, x + 2.5, by - 63.6);
       ctx.closePath();
-    }, SKIN, 2.4);
+    }, '#963f32', 1.8);
+
+    // 野猪牙面甲：两排交错，荷马笔下奥德修斯的标志
+    const tuskRy = [by - 58.8, by - 54.6];
+    const tuskHalf = [7.6, 5.8];
+    const tuskN = [6, 4];
+    for (let row = 0; row < 2; row++) {
+      const ry = tuskRy[row];
+      const n = tuskN[row];
+      const half = tuskHalf[row];
+      for (let i = 0; i <= n; i++) {
+        const tx = x - half + (i / n) * half * 2 + sj(row * 7 + i) * 0.5;
+        ink(function () {
+          ctx.moveTo(tx - 1.2, ry + 1.4);
+          ctx.quadraticCurveTo(tx - 1.5, ry - 1, tx, ry - 2.1);
+          ctx.quadraticCurveTo(tx + 1.5, ry - 1, tx + 1.2, ry + 1.4);
+          ctx.closePath();
+        }, BONE, 0.9);
+      }
+    }
+
+    // 护腕：压在手臂上，跟着手臂走
+    for (let s = -1; s <= 1; s += 2) {
+      ctx.strokeStyle = '#3d2c1c';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(x + s * 13, by - 23.4);
+      ctx.lineTo(x + s * 10.4, by - 22.2);
+      ctx.moveTo(x + s * 13.4, by - 21);
+      ctx.lineTo(x + s * 10.8, by - 20);
+      ctx.stroke();
+    }
 
     ctx.restore();
   }
@@ -674,23 +1538,31 @@
     const lean = sj(i * 4.1) * 1.2;
     shadow(x, y + 1.5, 11, 4.2, 0.30);
 
-    // 腿骨
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = 4.2;
-    ctx.beginPath();
-    ctx.moveTo(x - 3, by - 12);
-    ctx.lineTo(x - 5, by);
-    ctx.moveTo(x + 3, by - 12);
-    ctx.lineTo(x + 5.5, by);
-    ctx.stroke();
-    ctx.strokeStyle = BONE;
-    ctx.lineWidth = 2.2;
-    ctx.beginPath();
-    ctx.moveTo(x - 3, by - 12);
-    ctx.lineTo(x - 5, by);
-    ctx.moveTo(x + 3, by - 12);
-    ctx.lineTo(x + 5.5, by);
-    ctx.stroke();
+    // 腿骨：股骨 + 膝关节 + 胫骨，不是一根直棍
+    for (let s = -1; s <= 1; s += 2) {
+      const hx = x + s * 3;
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 4.4;
+      ctx.beginPath();
+      ctx.moveTo(hx, by - 12);
+      ctx.lineTo(hx + s * 1.6, by - 6.4);
+      ctx.stroke();
+      ctx.strokeStyle = BONE;
+      ctx.lineWidth = 2.4;
+      ctx.stroke();
+      // 膝关节
+      ink(function () { ctx.ellipse(hx + s * 1.6, by - 6.4, 2, 1.9, 0, 0, 6.3); }, BONE_D, 1.4);
+      // 胫骨
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(hx + s * 1.6, by - 6);
+      ctx.lineTo(x + s * 5, by);
+      ctx.stroke();
+      ctx.strokeStyle = BONE;
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+    }
     // 脚
     ink(function () { ctx.ellipse(x - 5, by, 3.6, 1.7, 0, 0, 6.3); }, BONE_D, 1.6);
     ink(function () { ctx.ellipse(x + 5.5, by, 3.6, 1.7, 0, 0, 6.3); }, BONE_D, 1.6);
@@ -725,7 +1597,8 @@
       ctx.stroke();
     }
 
-    // 手臂 + 锈剑
+    // 肩关节与手臂：骨头有肩、肘两个关节
+    ink(function () { ctx.ellipse(x + 4.6, by - 22.4, 2.3, 2.1, 0, 0, 6.3); }, BONE, 1.5);
     ctx.strokeStyle = INK;
     ctx.lineWidth = 4;
     ctx.beginPath();
@@ -735,6 +1608,8 @@
     ctx.strokeStyle = BONE;
     ctx.lineWidth = 2;
     ctx.stroke();
+    // 肘关节
+    ink(function () { ctx.ellipse(x + 10, by - 15, 2, 1.8, 0, 0, 6.3); }, BONE, 1.4);
     // 剑
     ctx.strokeStyle = INK;
     ctx.lineWidth = 4.6;
@@ -800,85 +1675,97 @@
     const by = y + breathe * 0.25;
     shadow(x, y + 2, 36, 11, 0.40);
 
-    // 双腿：粗柱 + 兽皮护腿
-    for (let s = -1; s <= 1; s += 2) {
-      ink(function () {
-        ctx.moveTo(x + s * 8, by - 40);
-        ctx.lineTo(x + s * 25, by - 40);
-        ctx.lineTo(x + s * 26, by - 3);
-        ctx.lineTo(x + s * 9, by - 3);
-        ctx.closePath();
-      }, CY_SKIN_D, 2.8);
-      ctx.strokeStyle = 'rgba(60,64,46,0.7)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x + s * 10, by - 27);
-      ctx.lineTo(x + s * 25, by - 27);
-      ctx.stroke();
-      ink(function () {
-        ctx.moveTo(x + s * 8, by - 12);
-        ctx.lineTo(x + s * 26, by - 12);
-        ctx.quadraticCurveTo(x + s * 31, by + 3, x + s * 12, by + 3);
-        ctx.closePath();
-      }, LEATHER, 2.4);
-    }
-
-    // 兽皮裙
-    ink(function () {
-      ctx.moveTo(x - 27, by - 54);
-      ctx.lineTo(x + 27, by - 54);
-      ctx.lineTo(x + 32, by - 30);
-      ctx.quadraticCurveTo(x, by - 23, x - 32, by - 30);
+    /* 一体剪影：双腿、躯干连成一片 */
+    function bodyPath() {
+      ctx.moveTo(x - 10, by - 112);
+      ctx.quadraticCurveTo(x - 24, by - 111, x - 32, by - 103);
+      ctx.quadraticCurveTo(x - 34, by - 92, x - 33, by - 84);
+      ctx.quadraticCurveTo(x - 31, by - 70, x - 31, by - 58);
+      ctx.quadraticCurveTo(x - 32, by - 50, x - 31, by - 44);
+      ctx.quadraticCurveTo(x - 29, by - 34, x - 28, by - 22);
+      ctx.quadraticCurveTo(x - 27.4, by - 6, x - 26, by - 3);
+      ctx.quadraticCurveTo(x - 22, by + 1.6, x - 14, by + 2);
+      ctx.quadraticCurveTo(x - 9, by + 1.6, x - 8, by - 2);
+      ctx.quadraticCurveTo(x - 6, by - 12, x - 4, by - 26);
+      ctx.quadraticCurveTo(x - 1, by - 32, x, by - 36);
+      ctx.quadraticCurveTo(x + 1, by - 32, x + 4, by - 26);
+      ctx.quadraticCurveTo(x + 6, by - 12, x + 8, by - 2);
+      ctx.quadraticCurveTo(x + 9, by + 1.6, x + 14, by + 2);
+      ctx.quadraticCurveTo(x + 22, by + 1.6, x + 26, by - 3);
+      ctx.quadraticCurveTo(x + 27.4, by - 6, x + 28, by - 22);
+      ctx.quadraticCurveTo(x + 29, by - 34, x + 31, by - 44);
+      ctx.quadraticCurveTo(x + 32, by - 50, x + 31, by - 58);
+      ctx.quadraticCurveTo(x + 31, by - 70, x + 33, by - 84);
+      ctx.quadraticCurveTo(x + 34, by - 92, x + 32, by - 103);
+      ctx.quadraticCurveTo(x + 24, by - 111, x + 10, by - 112);
+      ctx.quadraticCurveTo(x, by - 113.4, x - 10, by - 112);
       ctx.closePath();
-    }, LEATHER, 2.8);
-    innerLight(x - 10, by - 46, 14, 6, '#c69a64', 0.22);
+    }
+    ctx.beginPath();
+    bodyPath();
+    ctx.fillStyle = CY_SKIN;
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+
+    /* 剪影内分区 */
+    ctx.save();
+    ctx.beginPath();
+    bodyPath();
+    ctx.clip();
+
+    // 双腿：比躯干暗一档
+    ctx.fillStyle = CY_SKIN_D;
+    ctx.fillRect(x - 29, by - 44, 21, 46);
+    ctx.fillRect(x + 8, by - 44, 21, 46);
+    // 兽皮护腿
+    ctx.fillStyle = LEATHER;
+    ctx.beginPath();
+    ctx.moveTo(x - 29, by - 16);
+    ctx.lineTo(x - 7, by - 16);
+    ctx.quadraticCurveTo(x - 8, by + 2, x - 14, by + 2);
+    ctx.quadraticCurveTo(x - 27, by + 2, x - 29, by - 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + 29, by - 16);
+    ctx.lineTo(x + 7, by - 16);
+    ctx.quadraticCurveTo(x + 8, by + 2, x + 14, by + 2);
+    ctx.quadraticCurveTo(x + 27, by + 2, x + 29, by - 10);
+    ctx.closePath();
+    ctx.fill();
+    // 护腿上的毛边
+    ctx.strokeStyle = 'rgba(48,32,20,0.5)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(x - 28, by - 15);
+    ctx.lineTo(x - 8, by - 15);
+    ctx.moveTo(x + 28, by - 15);
+    ctx.lineTo(x + 8, by - 15);
+    ctx.stroke();
+
+    // 兽皮裙：盖住腰胯
+    ctx.fillStyle = LEATHER;
+    ctx.beginPath();
+    ctx.moveTo(x - 31, by - 55);
+    ctx.lineTo(x + 31, by - 55);
+    ctx.lineTo(x + 33, by - 29);
+    ctx.quadraticCurveTo(x, by - 22, x - 33, by - 29);
+    ctx.closePath();
+    ctx.fill();
+    // 裙上的斑点
     ctx.fillStyle = 'rgba(40,26,16,0.5)';
     for (let i = 0; i < 9; i++) {
       const px2 = x - 24 + jit(i * 3.3) * 48;
-      const py2 = by - 49 + jit(i * 3.3 + 1) * 20;
+      const py2 = by - 50 + jit(i * 3.3 + 1) * 20;
       ctx.beginPath();
       ctx.ellipse(px2, py2, 2.6, 2, 0.4, 0, 6.3);
       ctx.fill();
     }
     // 腰带
-    ink(function () { ctx.rect(x - 28, by - 55, 56, 5); }, '#4e3623', 2);
-
-    // 左臂：暗一档，和躯干分开
-    ink(function () {
-      ctx.moveTo(x - 28, by - 92);
-      ctx.quadraticCurveTo(x - 40, by - 74, x - 38, by - 56);
-      ctx.lineTo(x - 27, by - 55);
-      ctx.quadraticCurveTo(x - 29, by - 74, x - 19, by - 86);
-      ctx.closePath();
-    }, CY_SKIN_D, 2.8);
-    ink(function () { ctx.ellipse(x - 33, by - 50, 9, 8, 0.15, 0, 6.3); }, CY_SKIN_D, 2.6);
-
-    // 躯干：宽肩厚胸
-    ink(function () {
-      ctx.moveTo(x - 29, by - 100);
-      ctx.quadraticCurveTo(x - 40, by - 78, x - 30, by - 56);
-      ctx.lineTo(x + 30, by - 56);
-      ctx.quadraticCurveTo(x + 40, by - 78, x + 29, by - 100);
-      ctx.quadraticCurveTo(x, by - 110, x - 29, by - 100);
-      ctx.closePath();
-    }, CY_SKIN, 3);
-    innerLight(x - 11, by - 92, 16, 9, '#cfd3ae', 0.32);
-    // 右侧暗部
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(x - 29, by - 100);
-    ctx.quadraticCurveTo(x - 40, by - 78, x - 30, by - 56);
-    ctx.lineTo(x + 30, by - 56);
-    ctx.quadraticCurveTo(x + 40, by - 78, x + 29, by - 100);
-    ctx.quadraticCurveTo(x, by - 110, x - 29, by - 100);
-    ctx.closePath();
-    ctx.clip();
-    ctx.globalAlpha = 0.20;
-    ctx.fillStyle = '#3e4432';
-    ctx.beginPath();
-    ctx.ellipse(x + 26, by - 76, 20, 30, 0.15, 0, 6.3);
-    ctx.fill();
-    ctx.restore();
+    ctx.fillStyle = '#4e3623';
+    ctx.fillRect(x - 31, by - 57, 62, 5);
 
     // 胸肌与旧伤疤
     ctx.strokeStyle = 'rgba(72,78,58,0.72)';
@@ -897,6 +1784,30 @@
     ctx.lineWidth = 2;
     roughPath(x - 16, by - 72, x + 3, by - 64, 5, 2.2);
     ctx.stroke();
+
+    // 胸腹受光 + 右侧暗部
+    ctx.fillStyle = 'rgba(207,211,174,0.30)';
+    ctx.beginPath();
+    ctx.ellipse(x - 11, by - 92, 15, 8.4, -0.24, 0, 6.3);
+    ctx.fill();
+    const sh = ctx.createLinearGradient(x - 33, 0, x + 33, 0);
+    sh.addColorStop(0, 'rgba(255,255,225,0.10)');
+    sh.addColorStop(0.46, 'rgba(0,0,0,0)');
+    sh.addColorStop(1, 'rgba(0,0,0,0.22)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(x - 34, by - 114, 68, 116);
+
+    ctx.restore();
+
+    // 左臂：垂着，压在身侧
+    ink(function () {
+      ctx.moveTo(x - 30, by - 100);
+      ctx.quadraticCurveTo(x - 40, by - 80, x - 38, by - 58);
+      ctx.lineTo(x - 27, by - 56);
+      ctx.quadraticCurveTo(x - 29, by - 76, x - 20, by - 92);
+      ctx.closePath();
+    }, CY_SKIN_D, 2.8);
+    ink(function () { ctx.ellipse(x - 33, by - 51, 9, 8, 0.15, 0, 6.3); }, CY_SKIN_D, 2.6);
 
     // 脖子
     ink(function () {
@@ -1066,6 +1977,696 @@
     ink(function () { ctx.ellipse(x + 17, by - 113, 3.6, 5.4, -0.35, 0, 6.3); }, CY_SKIN_D, 2);
   }
 
+  /* ── 第一幕角色：民众、士兵、战车长 ───────────── */
+
+  // 民众：亚麻短衣的平民，攥着石头，被逼急了才还手
+  function drawCitizen(x, y, i) {
+    const bob = Math.sin(t * 2.6 + (i || 0) * 1.3) * 0.6;
+    const by = y + bob;
+    shadow(x, y + 1.5, 9, 3.4, 0.26);
+
+    /* 一体剪影：颈、肩、手臂、腰、腿、脚一次成型 */
+    function bodyPath() {
+      ctx.moveTo(x - 3.4, by - 34);
+      ctx.quadraticCurveTo(x - 6.8, by - 33.6, x - 8.6, by - 30.6);
+      ctx.quadraticCurveTo(x - 10.4, by - 28, x - 10.4, by - 23.4);
+      ctx.quadraticCurveTo(x - 10.4, by - 18, x - 9.8, by - 15);
+      ctx.quadraticCurveTo(x - 9, by - 13.6, x - 8, by - 14);
+      ctx.quadraticCurveTo(x - 7.3, by - 15.4, x - 7.4, by - 18.6);
+      ctx.quadraticCurveTo(x - 7.3, by - 15, x - 7, by - 12.4);
+      ctx.quadraticCurveTo(x - 6.2, by - 8, x - 5.4, by - 3);
+      ctx.quadraticCurveTo(x - 5.2, by - 0.6, x - 6, by + 1.2);
+      ctx.quadraticCurveTo(x - 4.4, by + 1.6, x - 2.8, by + 1.2);
+      ctx.quadraticCurveTo(x - 1.5, by + 0.4, x - 1.2, by - 3.4);
+      ctx.quadraticCurveTo(x - 1, by - 5.6, x, by - 7.4);
+      ctx.quadraticCurveTo(x + 1, by - 5.6, x + 1.2, by - 3.4);
+      ctx.quadraticCurveTo(x + 1.5, by + 0.4, x + 2.8, by + 1.2);
+      ctx.quadraticCurveTo(x + 4.4, by + 1.6, x + 6, by + 1.2);
+      ctx.quadraticCurveTo(x + 5.2, by - 0.6, x + 5.4, by - 3);
+      ctx.quadraticCurveTo(x + 6.2, by - 8, x + 7, by - 12.4);
+      ctx.quadraticCurveTo(x + 7.3, by - 15, x + 7.4, by - 18.6);
+      ctx.quadraticCurveTo(x + 7.3, by - 15.4, x + 8, by - 14);
+      ctx.quadraticCurveTo(x + 9, by - 13.6, x + 9.8, by - 15);
+      ctx.quadraticCurveTo(x + 10.4, by - 18, x + 10.4, by - 23.4);
+      ctx.quadraticCurveTo(x + 10.4, by - 28, x + 8.6, by - 30.6);
+      ctx.quadraticCurveTo(x + 6.8, by - 33.6, x + 3.4, by - 34);
+      ctx.quadraticCurveTo(x, by - 34.4, x - 3.4, by - 34);
+      ctx.closePath();
+    }
+    ctx.beginPath();
+    bodyPath();
+    ctx.fillStyle = '#c4ad84';
+    ctx.fill();
+    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+
+    /* 剪影内分区 */
+    ctx.save();
+    ctx.beginPath();
+    bodyPath();
+    ctx.clip();
+
+    // 裸腿
+    ctx.fillStyle = SKIN;
+    ctx.fillRect(x - 6.8, by - 13, 5.2, 14.4);
+    ctx.fillRect(x + 1.6, by - 13, 5.2, 14.4);
+    // 双臂：从短袖里露出
+    ctx.fillRect(x - 10.6, by - 28.6, 3.4, 13.6);
+    ctx.fillRect(x + 7.2, by - 28.6, 3.4, 13.6);
+    // 短袖口
+    ctx.fillStyle = '#b09a72';
+    ctx.fillRect(x - 10.6, by - 29.4, 3.4, 2);
+    ctx.fillRect(x + 7.2, by - 29.4, 3.4, 2);
+    // 衣褶
+    ctx.strokeStyle = 'rgba(120,100,70,0.45)';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(x - 2.4, by - 13);
+    ctx.lineTo(x - 2.2, by - 27);
+    ctx.moveTo(x + 2.4, by - 13);
+    ctx.lineTo(x + 2.6, by - 27);
+    ctx.stroke();
+    // 侧面明暗
+    const sh = ctx.createLinearGradient(x - 10, 0, x + 10, 0);
+    sh.addColorStop(0, 'rgba(255,245,215,0.12)');
+    sh.addColorStop(0.45, 'rgba(0,0,0,0)');
+    sh.addColorStop(1, 'rgba(0,0,0,0.20)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(x - 11, by - 35, 22, 36);
+
+    ctx.restore();
+
+    // 右臂：举着石头（压在垂臂上，形成"抬手"的动作）
+    ink(function () {
+      ctx.moveTo(x + 7.4, by - 29);
+      ctx.quadraticCurveTo(x + 10.2, by - 31.8, x + 11.4, by - 34.6);
+      ctx.lineTo(x + 9.6, by - 35.6);
+      ctx.quadraticCurveTo(x + 8.4, by - 32.6, x + 6.2, by - 30.6);
+      ctx.closePath();
+    }, SKIN, 1.9);
+    ink(function () { ctx.ellipse(x + 12.2, by - 36.6, 3.4, 3.1, 0.3, 0, 6.3); }, '#8a8078', 1.7);
+
+    // 头
+    ink(function () { ctx.ellipse(x, by - 34, 8, 8.2, 0, 0, 6.3); }, SKIN, 2.2);
+    // 深色短发
+    ink(function () {
+      ctx.moveTo(x - 8.2, by - 35);
+      ctx.quadraticCurveTo(x - 8.6, by - 44, x, by - 44.6);
+      ctx.quadraticCurveTo(x + 8.6, by - 44, x + 8.2, by - 35);
+      ctx.quadraticCurveTo(x + 5.4, by - 38.6, x, by - 38);
+      ctx.quadraticCurveTo(x - 5.4, by - 38.6, x - 8.2, by - 35);
+      ctx.closePath();
+    }, '#3a2a1e', 2);
+    // 眼睛
+    ctx.fillStyle = '#f3e7cd';
+    ctx.beginPath();
+    ctx.ellipse(x - 3.2, by - 33.6, 2.1, 2.2, 0, 0, 6.3);
+    ctx.ellipse(x + 3.2, by - 33.6, 2.1, 2.2, 0, 0, 6.3);
+    ctx.fill();
+    ctx.fillStyle = '#2b3038';
+    ctx.beginPath();
+    ctx.ellipse(x - 3.1, by - 33.6, 1.2, 1.4, 0, 0, 6.3);
+    ctx.ellipse(x + 3.3, by - 33.6, 1.2, 1.4, 0, 0, 6.3);
+    ctx.fill();
+    // 抿紧的嘴
+    ctx.strokeStyle = 'rgba(120,64,44,0.8)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(x - 2, by - 29.2);
+    ctx.lineTo(x + 2, by - 29.2);
+    ctx.stroke();
+  }
+
+  // 士兵：喀孔涅斯重装步兵，青铜盔 + 红羽冠 + 长矛圆盾
+  function drawSoldier(x, y, i) {
+    const bob = Math.sin(t * 2.3 + (i || 0) * 1.6) * 0.7;
+    const by = y + bob;
+    shadow(x, y + 1.5, 11, 4, 0.28);
+
+    /* 一体剪影：颈、肩、手臂、腰、腿、靴一次成型 */
+    function bodyPath() {
+      ctx.moveTo(x - 3.8, by - 44);
+      ctx.quadraticCurveTo(x - 7.6, by - 43.6, x - 10.6, by - 39.4);
+      ctx.quadraticCurveTo(x - 12.8, by - 36.6, x - 12.8, by - 30);
+      ctx.quadraticCurveTo(x - 12.8, by - 23, x - 12.2, by - 20);
+      ctx.quadraticCurveTo(x - 11.4, by - 18.4, x - 10.4, by - 19);
+      ctx.quadraticCurveTo(x - 9.8, by - 20.4, x - 9.9, by - 24);
+      ctx.quadraticCurveTo(x - 9.8, by - 20.6, x - 9.5, by - 18.6);
+      ctx.quadraticCurveTo(x - 9.2, by - 16, x - 9.8, by - 15);
+      ctx.quadraticCurveTo(x - 8.6, by - 11, x - 8, by - 6);
+      ctx.quadraticCurveTo(x - 8.2, by - 4.6, x - 8.9, by - 3.6);
+      ctx.quadraticCurveTo(x - 8.6, by + 1.3, x - 4.6, by + 1.5);
+      ctx.quadraticCurveTo(x - 2.6, by + 1.4, x - 2.2, by - 1.4);
+      ctx.quadraticCurveTo(x - 2, by - 4.4, x, by - 8);
+      ctx.quadraticCurveTo(x + 2, by - 4.4, x + 2.2, by - 1.4);
+      ctx.quadraticCurveTo(x + 2.6, by + 1.4, x + 4.6, by + 1.5);
+      ctx.quadraticCurveTo(x + 8.6, by + 1.3, x + 8.9, by - 3.6);
+      ctx.quadraticCurveTo(x + 8.2, by - 4.6, x + 8, by - 6);
+      ctx.quadraticCurveTo(x + 8.6, by - 11, x + 9.8, by - 15);
+      ctx.quadraticCurveTo(x + 9.2, by - 16, x + 9.5, by - 18.6);
+      ctx.quadraticCurveTo(x + 9.8, by - 20.6, x + 9.9, by - 24);
+      ctx.quadraticCurveTo(x + 9.8, by - 20.4, x + 10.4, by - 19);
+      ctx.quadraticCurveTo(x + 11.4, by - 18.4, x + 12.2, by - 20);
+      ctx.quadraticCurveTo(x + 12.8, by - 23, x + 12.8, by - 30);
+      ctx.quadraticCurveTo(x + 12.8, by - 36.6, x + 10.6, by - 39.4);
+      ctx.quadraticCurveTo(x + 7.6, by - 43.6, x + 3.8, by - 44);
+      ctx.quadraticCurveTo(x, by - 44.6, x - 3.8, by - 44);
+      ctx.closePath();
+    }
+    ctx.beginPath();
+    bodyPath();
+    ctx.fillStyle = '#8a6132';
+    ctx.fill();
+    ctx.lineWidth = 2.6;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+
+    /* 剪影内分区 */
+    ctx.save();
+    ctx.beginPath();
+    bodyPath();
+    ctx.clip();
+
+    // 腿
+    ctx.fillStyle = '#4a3a2c';
+    ctx.fillRect(x - 8.6, by - 16, 6.6, 12);
+    ctx.fillRect(x + 2, by - 16, 6.6, 12);
+    // 靴
+    ctx.fillStyle = '#241a12';
+    ctx.fillRect(x - 9.2, by - 5, 7.4, 6.6);
+    ctx.fillRect(x + 1.8, by - 5, 7.4, 6.6);
+    // 双臂
+    ctx.fillStyle = SKIN;
+    ctx.fillRect(x - 12.9, by - 37, 3.4, 16);
+    ctx.fillRect(x + 9.5, by - 37, 3.4, 16);
+    // 红色皮条战裙
+    for (let k = -1; k <= 1; k++) {
+      const px = x + k * 5;
+      ctx.beginPath();
+      ctx.moveTo(px - 2.5, by - 26);
+      ctx.lineTo(px + 2.5, by - 26);
+      ctx.lineTo(px + 2.1, by - 13.4);
+      ctx.lineTo(px - 2.1, by - 13.4);
+      ctx.closePath();
+      ctx.fillStyle = k === 1 ? '#7c2c23' : '#8a3328';
+      ctx.fill();
+    }
+    // 战裙上沿的金边
+    ctx.fillStyle = TRIM;
+    ctx.fillRect(x - 8.4, by - 27, 16.8, 2.6);
+    // 胸甲高光
+    ctx.fillStyle = 'rgba(229,188,109,0.32)';
+    ctx.beginPath();
+    ctx.ellipse(x - 3.6, by - 34, 5, 3.6, -0.3, 0, 6.3);
+    ctx.fill();
+    // 侧面明暗
+    const sh = ctx.createLinearGradient(x - 13, 0, x + 13, 0);
+    sh.addColorStop(0, 'rgba(255,238,196,0.12)');
+    sh.addColorStop(0.45, 'rgba(0,0,0,0)');
+    sh.addColorStop(1, 'rgba(0,0,0,0.26)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(x - 14, by - 45, 28, 47);
+
+    ctx.restore();
+
+    // 长矛：斜举向右上，握在右手
+    ctx.strokeStyle = '#6b4a2f';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(x + 10.4, by - 13);
+    ctx.lineTo(x + 16.2, by - 60);
+    ctx.stroke();
+    ink(function () {
+      ctx.moveTo(x + 15.7, by - 59);
+      ctx.lineTo(x + 19.2, by - 69);
+      ctx.lineTo(x + 17.7, by - 59.2);
+      ctx.closePath();
+    }, '#cfc8b2', 1.4);
+
+    // 圆盾：挂在左臂外
+    ink(function () { ctx.ellipse(x - 11.6, by - 31, 7.4, 8.6, 0.1, 0, 6.3); }, '#b89454', 2.2);
+    ctx.strokeStyle = 'rgba(60,42,24,0.7)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.ellipse(x - 11.6, by - 31, 4.6, 5.4, 0.1, 0, 6.3);
+    ctx.stroke();
+    ctx.fillStyle = TRIM;
+    ctx.beginPath();
+    ctx.arc(x - 11.6, by - 31, 1.8, 0, 6.3);
+    ctx.fill();
+    ctx.lineWidth = 0.9;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+
+    // 头
+    ink(function () { ctx.ellipse(x, by - 50.4, 7, 7.4, 0, 0, 6.3); }, SKIN, 2.1);
+    ctx.fillStyle = '#2b3038';
+    ctx.beginPath();
+    ctx.ellipse(x - 2.8, by - 50, 1.3, 1.5, 0, 0, 6.3);
+    ctx.ellipse(x + 2.8, by - 50, 1.3, 1.5, 0, 0, 6.3);
+    ctx.fill();
+
+    // 青铜盔
+    ink(function () {
+      ctx.moveTo(x - 9.2, by - 53);
+      ctx.quadraticCurveTo(x - 9.8, by - 61.4, x, by - 62.4);
+      ctx.quadraticCurveTo(x + 9.8, by - 61.4, x + 9.2, by - 53);
+      ctx.quadraticCurveTo(x, by - 51.4, x - 9.2, by - 53);
+      ctx.closePath();
+    }, HELM, 2.4);
+    innerLight(x - 3, by - 56.4, 4.4, 2.4, '#cfc7a4', 0.3);
+    // 红色羽冠
+    ink(function () {
+      ctx.moveTo(x - 2.5, by - 61);
+      ctx.quadraticCurveTo(x - 3.5, by - 69.4, x - 0.8, by - 71.8);
+      ctx.quadraticCurveTo(x + 1.6, by - 73, x + 2.5, by - 61);
+      ctx.closePath();
+    }, '#a03830', 1.8);
+  }
+
+  // 战车长：两匹马拉的木战车，车上站着持矛的战士
+  function drawChariot(x, y) {
+    const bob = Math.sin(t * 1.8) * 0.9;
+    const by = y + bob;
+    shadow(x, y + 2, 44, 10, 0.34);
+
+    // ── 车轮：先画，压在车厢后面 ──
+    for (let s = -1; s <= 1; s += 2) {
+      const wx = x + s * 33;
+      ink(function () { ctx.ellipse(wx, by - 25, 14, 14, 0, 0, 6.3); }, '#3d2718', 2.4);
+      ctx.strokeStyle = 'rgba(132,96,60,0.55)';
+      ctx.lineWidth = 1.5;
+      for (let k = 0; k < 6; k++) {
+        const a = (k / 6) * 6.283 + 0.5;
+        ctx.beginPath();
+        ctx.moveTo(wx, by - 25);
+        ctx.lineTo(wx + Math.cos(a) * 11, by - 25 + Math.sin(a) * 11);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#6b4a2f';
+      ctx.beginPath();
+      ctx.arc(wx, by - 25, 3, 0, 6.3);
+      ctx.fill();
+    }
+
+    // ── 两匹马：正面朝下，脖子从车厢底下伸出来 ──
+    for (let s = -1; s <= 1; s += 2) {
+      const hx = x + s * 18;
+
+      // 脖子
+      ink(function () {
+        ctx.moveTo(hx - 7, by - 52);
+        ctx.lineTo(hx + 7, by - 52);
+        ctx.lineTo(hx + 5.6, by - 30);
+        ctx.lineTo(hx - 5.6, by - 30);
+        ctx.closePath();
+      }, '#4a3018', 2.2);
+
+      // 马头：长脸朝下
+      ink(function () {
+        ctx.moveTo(hx - 5.6, by - 34);
+        ctx.quadraticCurveTo(hx - 6.8, by - 18, hx, by - 9);
+        ctx.quadraticCurveTo(hx + 6.8, by - 18, hx + 5.6, by - 34);
+        ctx.closePath();
+      }, '#6d4c28', 2.2);
+      innerLight(hx - 2, by - 26, 3, 5, '#a37a45', 0.28);
+
+      // 鼻梁白斑：让马脸在暖色沙滩上读得出来
+      ctx.fillStyle = 'rgba(232,220,196,0.5)';
+      ctx.beginPath();
+      ctx.moveTo(hx - 2, by - 33);
+      ctx.quadraticCurveTo(hx - 2.6, by - 20, hx, by - 11);
+      ctx.quadraticCurveTo(hx + 2.6, by - 20, hx + 2, by - 33);
+      ctx.closePath();
+      ctx.fill();
+
+      // 耳朵
+      ink(function () {
+        ctx.moveTo(hx - 5.4, by - 33);
+        ctx.lineTo(hx - 7.2, by - 41);
+        ctx.lineTo(hx - 2.6, by - 34.4);
+        ctx.closePath();
+      }, '#4a3018', 1.6);
+      ink(function () {
+        ctx.moveTo(hx + 5.4, by - 33);
+        ctx.lineTo(hx + 7.2, by - 41);
+        ctx.lineTo(hx + 2.6, by - 34.4);
+        ctx.closePath();
+      }, '#4a3018', 1.6);
+
+      // 眼与鼻
+      ctx.fillStyle = '#140d08';
+      ctx.beginPath();
+      ctx.ellipse(hx - 3.2, by - 27, 1.6, 1.9, 0, 0, 6.3);
+      ctx.ellipse(hx + 3.2, by - 27, 1.6, 1.9, 0, 0, 6.3);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(20,13,8,0.7)';
+      ctx.beginPath();
+      ctx.ellipse(hx - 1.8, by - 12.4, 1, 1.3, 0, 0, 6.3);
+      ctx.ellipse(hx + 1.8, by - 12.4, 1, 1.3, 0, 0, 6.3);
+      ctx.fill();
+
+      // 鬃毛：沿脖子外侧一溜
+      ctx.strokeStyle = '#2e1d10';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.moveTo(hx + s * 6.2, by - 40);
+      ctx.quadraticCurveTo(hx + s * 8, by - 46, hx + s * 5.4, by - 52);
+      ctx.stroke();
+    }
+
+    // ── 车厢 ──
+    ink(function () {
+      ctx.moveTo(x - 30, by - 30);
+      ctx.lineTo(x + 30, by - 30);
+      ctx.lineTo(x + 28, by - 54);
+      ctx.lineTo(x - 28, by - 54);
+      ctx.closePath();
+    }, '#6b4a2f', 2.6);
+    // 木板缝
+    ctx.strokeStyle = 'rgba(44,29,17,0.6)';
+    ctx.lineWidth = 1.4;
+    for (let k = 1; k < 3; k++) {
+      ctx.beginPath();
+      ctx.moveTo(x - 29 + k * 0.6, by - 30 - k * 8);
+      ctx.lineTo(x + 29 - k * 0.6, by - 30 - k * 8);
+      ctx.stroke();
+    }
+    // 车厢上沿受光
+    ctx.strokeStyle = 'rgba(196,158,108,0.5)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(x - 27.6, by - 53);
+    ctx.lineTo(x + 27.6, by - 53);
+    ctx.stroke();
+
+    // ── 车上的战士：躯干带肩线，和头连成一体 ──
+    ink(function () {
+      ctx.moveTo(x - 9.4, by - 70.6);
+      ctx.quadraticCurveTo(x - 12.6, by - 68.8, x - 12.2, by - 62);
+      ctx.lineTo(x - 10.6, by - 54);
+      ctx.lineTo(x + 10.6, by - 54);
+      ctx.lineTo(x + 12.2, by - 62);
+      ctx.quadraticCurveTo(x + 12.6, by - 68.8, x + 9.4, by - 70.6);
+      ctx.quadraticCurveTo(x, by - 72.8, x - 9.4, by - 70.6);
+      ctx.closePath();
+    }, '#8a3328', 2.2);
+    ctx.fillStyle = TRIM;
+    ctx.fillRect(x - 10, by - 59, 20, 2.6);
+    // 肩甲：压住手臂与躯干的接缝
+    for (let s = -1; s <= 1; s += 2) {
+      ink(function () {
+        ctx.ellipse(x + s * 10.8, by - 67.6, 4.4, 3.6, s * 0.3, 0, 6.3);
+      }, '#b89454', 2);
+    }
+    // 头 + 盔
+    ink(function () { ctx.ellipse(x, by - 76, 7.4, 7.6, 0, 0, 6.3); }, SKIN, 2.1);
+    ctx.fillStyle = '#2b3038';
+    ctx.beginPath();
+    ctx.ellipse(x - 2.9, by - 76, 1.4, 1.6, 0, 0, 6.3);
+    ctx.ellipse(x + 2.9, by - 76, 1.4, 1.6, 0, 0, 6.3);
+    ctx.fill();
+    ink(function () {
+      ctx.moveTo(x - 9.6, by - 77);
+      ctx.quadraticCurveTo(x - 10.4, by - 87, x, by - 88.4);
+      ctx.quadraticCurveTo(x + 10.4, by - 87, x + 9.6, by - 77);
+      ctx.quadraticCurveTo(x, by - 75.2, x - 9.6, by - 77);
+      ctx.closePath();
+    }, HELM, 2.4);
+    innerLight(x - 3, by - 82, 4.6, 2.6, '#cfc7a4', 0.3);
+    // 羽冠：比士兵高，是首领的标志
+    ink(function () {
+      ctx.moveTo(x - 3, by - 87);
+      ctx.quadraticCurveTo(x - 4.6, by - 97, x - 1, by - 100);
+      ctx.quadraticCurveTo(x + 2, by - 101.4, x + 3, by - 87);
+      ctx.closePath();
+    }, '#a03830', 1.9);
+
+    // 长矛：斜举向右上
+    ctx.strokeStyle = '#6b4a2f';
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.moveTo(x - 4, by - 66);
+    ctx.lineTo(x + 40, by - 100);
+    ctx.stroke();
+    ink(function () {
+      ctx.moveTo(x + 38.4, by - 97.6);
+      ctx.lineTo(x + 46, by - 107);
+      ctx.lineTo(x + 42.2, by - 97.2);
+      ctx.closePath();
+    }, '#cfc8b2', 1.5);
+
+    // 持矛的手
+    ink(function () { ctx.ellipse(x - 3, by - 65.6, 2.6, 2.4, 0.4, 0, 6.3); }, SKIN, 1.6);
+  }
+
+  /* ── 第二幕角色：食莲者、食莲人王 ─────────────── */
+
+  // 食莲者：吃了忘忧花的人，闭着眼慢慢挪，头顶还开着一朵
+  function drawLotusEater(x, y, i) {
+    const sway = Math.sin(t * 1.9 + (i || 0) * 1.4) * 1.5;
+    const by = y + Math.sin(t * 3.2 + (i || 0) * 1.4) * 0.5;
+    shadow(x, y + 1.5, 9, 3.6, 0.26);
+
+    ctx.save();
+    ctx.translate(sway * 0.7, 0);
+
+    /* 一体剪影：颈、肩、手臂、腰、腿、脚一次成型 */
+    function bodyPath() {
+      ctx.moveTo(x - 3.2, by - 36);
+      ctx.quadraticCurveTo(x - 6, by - 35.6, x - 7, by - 33);
+      ctx.quadraticCurveTo(x - 9, by - 30, x - 9, by - 26);
+      ctx.quadraticCurveTo(x - 9, by - 22, x - 8.4, by - 19.8);
+      ctx.quadraticCurveTo(x - 7.6, by - 18.6, x - 6.8, by - 19.2);
+      ctx.quadraticCurveTo(x - 6.4, by - 20.4, x - 6.5, by - 24);
+      ctx.quadraticCurveTo(x - 6.5, by - 20, x - 6.4, by - 18);
+      ctx.quadraticCurveTo(x - 6.2, by - 14, x - 5.6, by - 10.6);
+      ctx.quadraticCurveTo(x - 5.6, by - 8.6, x - 5.9, by - 3);
+      ctx.quadraticCurveTo(x - 5.8, by - 0.6, x - 6.2, by + 1);
+      ctx.quadraticCurveTo(x - 4.4, by + 1.5, x - 2.8, by + 1);
+      ctx.quadraticCurveTo(x - 1.5, by + 0.2, x - 1.2, by - 3);
+      ctx.quadraticCurveTo(x - 1, by - 5, x, by - 6.4);
+      ctx.quadraticCurveTo(x + 1, by - 5, x + 1.2, by - 3);
+      ctx.quadraticCurveTo(x + 1.5, by + 0.2, x + 2.8, by + 1);
+      ctx.quadraticCurveTo(x + 4.4, by + 1.5, x + 6.2, by + 1);
+      ctx.quadraticCurveTo(x + 5.8, by - 0.6, x + 5.9, by - 3);
+      ctx.quadraticCurveTo(x + 5.6, by - 8.6, x + 5.6, by - 10.6);
+      ctx.quadraticCurveTo(x + 6.2, by - 14, x + 6.4, by - 18);
+      ctx.quadraticCurveTo(x + 6.5, by - 20, x + 6.5, by - 24);
+      ctx.quadraticCurveTo(x + 6.4, by - 20.4, x + 6.8, by - 19.2);
+      ctx.quadraticCurveTo(x + 7.6, by - 18.6, x + 8.4, by - 19.8);
+      ctx.quadraticCurveTo(x + 9, by - 22, x + 9, by - 26);
+      ctx.quadraticCurveTo(x + 9, by - 30, x + 7, by - 33);
+      ctx.quadraticCurveTo(x + 6, by - 35.6, x + 3.2, by - 36);
+      ctx.quadraticCurveTo(x, by - 36.4, x - 3.2, by - 36);
+      ctx.closePath();
+    }
+    ctx.beginPath();
+    bodyPath();
+    ctx.fillStyle = LOTUS_SKIN;
+    ctx.fill();
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+
+    /* 剪影内分区 */
+    ctx.save();
+    ctx.beginPath();
+    bodyPath();
+    ctx.clip();
+
+    // 破布短裙
+    ctx.fillStyle = '#7a7250';
+    ctx.fillRect(x - 7.6, by - 22, 15.2, 11.4);
+    // 裙摆的破口
+    ctx.strokeStyle = 'rgba(40,38,24,0.6)';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(x - 3.4, by - 11.4);
+    ctx.lineTo(x - 3, by - 16);
+    ctx.moveTo(x + 1, by - 11.4);
+    ctx.lineTo(x + 1.4, by - 15.4);
+    ctx.moveTo(x + 4.6, by - 11.4);
+    ctx.lineTo(x + 4.2, by - 14);
+    ctx.stroke();
+    // 裙腰
+    ctx.fillStyle = '#5e5840';
+    ctx.fillRect(x - 7, by - 22.6, 14, 2.2);
+    // 侧面明暗
+    const sh = ctx.createLinearGradient(x - 9, 0, x + 9, 0);
+    sh.addColorStop(0, 'rgba(255,255,235,0.10)');
+    sh.addColorStop(0.45, 'rgba(0,0,0,0)');
+    sh.addColorStop(1, 'rgba(0,0,0,0.20)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(x - 10, by - 37, 20, 38);
+
+    ctx.restore();
+
+    // 双手在胸前捧着莲花
+    ink(function () {
+      ctx.moveTo(x - 6.4, by - 30);
+      ctx.lineTo(x - 2.6, by - 26.6);
+      ctx.lineTo(x - 1.2, by - 28);
+      ctx.lineTo(x - 5, by - 31.4);
+      ctx.closePath();
+    }, LOTUS_SKIN, 1.7);
+    ink(function () {
+      ctx.moveTo(x + 6.4, by - 30);
+      ctx.lineTo(x + 2.6, by - 26.6);
+      ctx.lineTo(x + 1.2, by - 28);
+      ctx.lineTo(x + 5, by - 31.4);
+      ctx.closePath();
+    }, LOTUS_SKIN, 1.7);
+    drawBloom(x, by - 27.4, 0.56);
+
+    // 头
+    ink(function () { ctx.ellipse(x, by - 42.6, 7.4, 7.6, 0, 0, 6.3); }, LOTUS_SKIN, 2.2);
+    // 闭着的眼：两条下垂的弧
+    ctx.strokeStyle = '#4a5a46';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(x - 2.8, by - 43.2, 2.2, 0.4, 2.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + 3.2, by - 43.2, 2.2, 0.4, 2.8);
+    ctx.stroke();
+    // 满足的微笑
+    ctx.strokeStyle = 'rgba(74,90,70,0.85)';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.arc(x, by - 40.2, 2.8, 0.5, 2.4);
+    ctx.stroke();
+
+    // 头顶的莲花
+    drawBloom(x, by - 51, 0.7);
+
+    ctx.restore();
+  }
+
+  // 食莲人王：肥胖的绿肤人，闭眼微笑，莲花冠，脚踩荷叶
+  function drawLotusKing(x, y) {
+    const breathe = Math.sin(t * 1.2) * 1.2;
+    const by = y + breathe * 0.3;
+    shadow(x, y + 2, 26, 8, 0.32);
+
+    // 脚下的荷叶
+    drawPad(x - 7, y + 1, 14);
+    drawPad(x + 10, y + 3, 9);
+
+    /* 一体剪影：头、颈、肩、手臂、肚子、腿、脚一次成型 */
+    function bodyPath() {
+      ctx.moveTo(x, by - 70.5);
+      ctx.quadraticCurveTo(x - 8.4, by - 70, x - 11.5, by - 63);
+      ctx.quadraticCurveTo(x - 12.5, by - 56, x - 6.4, by - 52.4);
+      ctx.quadraticCurveTo(x - 12.4, by - 51, x - 13.6, by - 48.4);
+      ctx.quadraticCurveTo(x - 19, by - 44, x - 19.4, by - 36);
+      ctx.quadraticCurveTo(x - 19.8, by - 30, x - 20, by - 27);
+      ctx.quadraticCurveTo(x - 19.8, by - 24.6, x - 17.6, by - 24.6);
+      ctx.quadraticCurveTo(x - 16.4, by - 25.6, x - 16.5, by - 29);
+      ctx.quadraticCurveTo(x - 19.6, by - 25, x - 19.4, by - 21);
+      ctx.quadraticCurveTo(x - 18, by - 16.6, x - 15.4, by - 16);
+      ctx.quadraticCurveTo(x - 12.8, by - 14, x - 12.2, by - 8);
+      ctx.quadraticCurveTo(x - 12, by - 3, x - 11.4, by - 1.4);
+      ctx.quadraticCurveTo(x - 10.6, by + 1.4, x - 5.4, by + 1.6);
+      ctx.quadraticCurveTo(x - 3, by + 1.4, x - 2.6, by - 1.4);
+      ctx.quadraticCurveTo(x - 2, by - 6, x, by - 10.4);
+      ctx.quadraticCurveTo(x + 2, by - 6, x + 2.6, by - 1.4);
+      ctx.quadraticCurveTo(x + 3, by + 1.4, x + 5.4, by + 1.6);
+      ctx.quadraticCurveTo(x + 10.6, by + 1.4, x + 11.4, by - 1.4);
+      ctx.quadraticCurveTo(x + 12, by - 3, x + 12.2, by - 8);
+      ctx.quadraticCurveTo(x + 12.8, by - 14, x + 15.4, by - 16);
+      ctx.quadraticCurveTo(x + 18, by - 16.6, x + 19.4, by - 21);
+      ctx.quadraticCurveTo(x + 19.6, by - 25, x + 16.5, by - 29);
+      ctx.quadraticCurveTo(x + 16.4, by - 25.6, x + 17.6, by - 24.6);
+      ctx.quadraticCurveTo(x + 19.8, by - 24.6, x + 20, by - 27);
+      ctx.quadraticCurveTo(x + 19.8, by - 30, x + 19.4, by - 36);
+      ctx.quadraticCurveTo(x + 19, by - 44, x + 13.6, by - 48.4);
+      ctx.quadraticCurveTo(x + 12.4, by - 51, x + 6.4, by - 52.4);
+      ctx.quadraticCurveTo(x + 12.5, by - 56, x + 11.5, by - 63);
+      ctx.quadraticCurveTo(x + 8.4, by - 70, x, by - 70.5);
+      ctx.closePath();
+    }
+    ctx.beginPath();
+    bodyPath();
+    ctx.fillStyle = '#7f8f5c';
+    ctx.fill();
+    ctx.lineWidth = 2.6;
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+
+    /* 剪影内分区 */
+    ctx.save();
+    ctx.beginPath();
+    bodyPath();
+    ctx.clip();
+
+    // 腿：比肚子深两档，并留出腿缝
+    ctx.fillStyle = '#5f6e44';
+    ctx.fillRect(x - 13.4, by - 22, 11.4, 24);
+    ctx.fillRect(x + 2, by - 22, 11.4, 24);
+    ctx.fillStyle = 'rgba(40,50,30,0.55)';
+    ctx.fillRect(x - 1.6, by - 21, 3.2, 22);
+    // 腰上的布带
+    ctx.fillStyle = 'rgba(122,114,80,0.9)';
+    ctx.fillRect(x - 16.4, by - 18.4, 32.8, 3.4);
+    // 肚脐
+    ctx.strokeStyle = 'rgba(60,72,44,0.6)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.arc(x, by - 26, 2, 0.4, 2.7);
+    ctx.stroke();
+    // 肚皮受光
+    ctx.fillStyle = 'rgba(168,183,130,0.30)';
+    ctx.beginPath();
+    ctx.ellipse(x - 6, by - 36, 9.4, 8.4, -0.24, 0, 6.3);
+    ctx.fill();
+    // 侧面明暗
+    const sh = ctx.createLinearGradient(x - 20, 0, x + 20, 0);
+    sh.addColorStop(0, 'rgba(255,255,225,0.10)');
+    sh.addColorStop(0.45, 'rgba(0,0,0,0)');
+    sh.addColorStop(1, 'rgba(0,0,0,0.20)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(x - 21, by - 71, 42, 73);
+
+    ctx.restore();
+
+    // 右臂：举起莲花（从肩头延伸出去）
+    ink(function () {
+      ctx.moveTo(x + 13.4, by - 46);
+      ctx.quadraticCurveTo(x + 18.6, by - 50, x + 20.4, by - 55);
+      ctx.lineTo(x + 17.8, by - 56.4);
+      ctx.quadraticCurveTo(x + 16, by - 51.6, x + 11.6, by - 48.4);
+      ctx.closePath();
+    }, '#8a9a64', 2);
+    drawBloom(x + 20, by - 60, 0.82);
+
+    // 闭眼 + 微笑 + 双下巴
+    ctx.strokeStyle = '#4a5a46';
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.arc(x - 4.4, by - 62.4, 2.8, 0.4, 2.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + 4.4, by - 62.4, 2.8, 0.4, 2.8);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(64,80,56,0.9)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(x, by - 58.4, 4.2, 0.45, 2.3);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(84,98,62,0.55)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.arc(x, by - 52.6, 5.4, 0.6, 2.5);
+    ctx.stroke();
+
+    // 莲花冠：三朵
+    drawBloom(x - 7.6, by - 70.4, 0.62);
+    drawBloom(x, by - 74.4, 0.78);
+    drawBloom(x + 7.6, by - 70.4, 0.62);
+  }
+
   /* ── 火光 ────────────────────────────────────── */
   function drawFire(x, y, seed) {
     // 光圈先铺，后面画实体压在上面
@@ -1202,33 +2803,55 @@
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    drawGround();
 
-    if (scene === 'combat') {
-      drawBones(150, 216, 2);
-      drawBones(336, 96, 7);
-      drawJar(104, 202);
-      drawJar(380, 120);
-      drawSkeleton(334, 204, 1);
-      drawSkeleton(300, 158, 2);
-      drawSkeleton(206, 220, 3);
-      drawHero(190, 174);
+    if (scene === 'act1') {
+      drawSandGround();
+      drawCampProps();
+      drawCitizen(100, 152, 1);
+      drawSoldier(300, 150, 1);
+      drawSoldier(250, 220, 2);
+      drawChariot(390, 200);
+      drawHero(190, 190);
+      drawCampWalls();
+    } else if (scene === 'act2') {
+      drawLotusGround();
+      drawLotusProps();
+      drawLotusEater(140, 154, 1);
+      drawLotusEater(318, 132, 2);
+      drawLotusEater(352, 218, 3);
+      drawLotusKing(238, 202);
+      drawHero(146, 228);
+      drawLotusEdge();
     } else {
-      drawJar(88, 210);
-      drawJar(392, 210);
-      drawBones(150, 120, 3);
-      drawCyclops(236, 226);
+      drawGround();
+
+      if (scene === 'combat') {
+        drawBones(150, 216, 2);
+        drawBones(336, 96, 7);
+        drawJar(104, 202);
+        drawJar(380, 120);
+        drawSkeleton(334, 204, 1);
+        drawSkeleton(300, 158, 2);
+        drawSkeleton(206, 220, 3);
+        drawHero(190, 174);
+      } else {
+        drawJar(88, 210);
+        drawJar(392, 210);
+        drawBones(150, 120, 3);
+        drawCyclops(236, 226);
+      }
+
+      drawWalls();
+      drawFire(50, 50, 1);
+      drawFire(W - 50, 50, 3.7);
     }
 
-    drawWalls();
-    drawFire(50, 50, 1);
-    drawFire(W - 50, 50, 3.7);
     drawDust();
 
-    // 整体暖调：让火光把整个洞窟染暖
+    // 整体暖调：洞穴里火光把整间屋子染暖；海滩只留一层薄暮色
     ctx.save();
     ctx.globalCompositeOperation = 'soft-light';
-    ctx.fillStyle = 'rgba(255,146,58,0.26)';
+    ctx.fillStyle = 'rgba(255,146,58,' + (scene === 'act1' ? 0.12 : scene === 'act2' ? 0.11 : 0.26) + ')';
     ctx.fillRect(0, 0, W, H);
     ctx.restore();
 
@@ -1237,14 +2860,73 @@
   }
 
   let last = 0;
+  let atlasPaused = false;
   function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000 || 0);
     last = now;
     t += dt;
-    draw();
+    if (!atlasPaused) draw();
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
+
+  /* ── 素材图鉴导出：atlas.html 复用这里的绘制函数 ── */
+  window.__atlas = {
+    cvs, W, H, RS,
+    palette: {
+      INK, INK_SOFT, ROCK, ROCK_D, ROCK_LL, WALL, WALL_L, MOSS, MOSS_L,
+      FIRE, FIRE_D, ARMOR, HELM, HELM_D, CAPE, RED, TRIM, SKIN, BONE, BONE_D,
+      CY_SKIN, CY_SKIN_D, LEATHER,
+      SAND, SAND_D, SAND_L, SEA, SEA_D, FOAM, WOOD, WOOD_D,
+      MUD, MUD_D, MUD_L, POND, POND_L, REED, TREE, TREE_L,
+      LOTUS_PINK, LOTUS_DEEP, LOTUS_Y, LOTUS_SKIN
+    },
+    reset(tt) {
+      atlasPaused = true;
+      t = tt || 0;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+      ctx.scale(RS, RS);
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      last = performance.now();
+    },
+    items: {
+      hero:     function (x, y) { drawHero(x, y); },
+      skeleton: function (x, y) { drawSkeleton(x, y, 1); },
+      cyclops:  function (x, y) { drawCyclops(x, y); },
+      jar:      function (x, y) { drawJar(x, y); },
+      bones:    function (x, y) { drawBones(x, y, 2); },
+      fire:     function (x, y) { drawFire(x, y, 1); },
+      door:     function (x, y) { drawDoor(x, y); },
+      ground:   function () { drawGround(); },
+      walls:    function () { drawWalls(); },
+      dust:     function () { drawDust(); },
+      vignette: function () { drawVignette(); },
+      ui:       function () { drawUI(); },
+      heart:    function (x, y) { heart(x, y, 6, true); },
+      // 第一幕海滩
+      sand:     function () { drawSandGround(); },
+      campEdge: function () { drawCampWalls(); },
+      ship:     function (x, y) { drawShip(x, y); },
+      tent:     function (x, y) { drawTent(x, y); },
+      campfire: function (x, y) { drawCampfire(x, y); },
+      loot:     function (x, y) { drawLoot(x, y); },
+      citizen:  function (x, y) { drawCitizen(x, y, 1); },
+      soldier:  function (x, y) { drawSoldier(x, y, 1); },
+      chariot:  function (x, y) { drawChariot(x, y); },
+      // 第二幕莲地
+      lotusGround: function () { drawLotusGround(); },
+      lotusEdge:   function () { drawLotusEdge(); },
+      lotusPad:    function (x, y) { drawPad(x, y, 15); },
+      lotusBloom:  function (x, y) { drawBloom(x, y, 1.1); },
+      sleeper:     function (x, y) { drawSleeper(x, y); },
+      lotusEater:  function (x, y) { drawLotusEater(x, y, 1); },
+      lotusKing:   function (x, y) { drawLotusKing(x, y); }
+    }
+  };
 
   document.querySelectorAll('button[data-scene]').forEach(function (b) {
     b.addEventListener('click', function () {

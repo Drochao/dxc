@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>素材图鉴 · Art Atlas</title>
+<style>
+  :root {
+    --ink: #1b1210;
+    --bg: #100b09;
+    --panel: #1d1512;
+    --panel-2: #251a15;
+    --line: #3a2a20;
+    --gold: #c99a62;
+    --gold-dim: #8a6a44;
+    --text: #d8c3a5;
+    --text-dim: #8b7660;
+    --text-faint: #6a5842;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background:
+      radial-gradient(circle at 50% 0%, #2a1d16 0%, #0b0807 62%) fixed,
+      #0b0807;
+    color: var(--text);
+    font-family: "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 24px 80px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  /* ── 页头 ── */
+  header {
+    padding: 64px 0 40px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 10px;
+    font-family: Georgia, "Songti SC", "Times New Roman", serif;
+    font-size: 40px;
+    font-weight: 400;
+    letter-spacing: .02em;
+    color: #eddcbe;
+  }
+  header h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+  header p {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: .22em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+  .stats {
+    display: flex; flex-wrap: wrap; gap: 34px;
+    margin-top: 30px;
+  }
+  .stat b {
+    display: block;
+    font-size: 22px; font-weight: 500;
+    color: var(--gold); letter-spacing: .02em;
+  }
+  .stat span {
+    font-size: 11px; letter-spacing: .18em;
+    color: var(--text-faint); text-transform: uppercase;
+  }
+
+  /* ── 分组 ── */
+  section { margin-top: 56px; }
+  section > h2 {
+    display: flex; align-items: center; gap: 14px;
+    margin: 0 0 22px;
+    font-size: 12px; font-weight: 500;
+    letter-spacing: .3em; text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+  section > h2::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--line), transparent);
+  }
+  section > h2 i {
+    font-style: normal; color: var(--text-faint);
+    letter-spacing: .1em; font-size: 11px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(226px, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+  .grid .wide { grid-column: span 2; }
+
+  /* ── 卡片 ── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+  }
+  .card:hover {
+    border-color: var(--gold-dim);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .55);
+  }
+  .stage {
+    display: flex; align-items: flex-end; justify-content: center;
+    height: 252px;
+    padding: 20px 12px 10px;
+    background:
+      radial-gradient(circle at 50% 78%, rgba(201, 154, 98, .10) 0%, transparent 62%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 4px);
+    border-bottom: 1px solid rgba(58, 42, 32, .6);
+  }
+  .stage canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .5));
+  }
+  .info { padding: 13px 14px 15px; }
+  .info h3 {
+    margin: 0;
+    font-size: 14px; font-weight: 500; color: #eddcbe;
+    display: flex; align-items: baseline; gap: 7px;
+  }
+  .info h3 span {
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .info code {
+    display: inline-block; margin: 7px 0 0;
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 10.5px; color: #a9752f;
+    background: rgba(201, 154, 98, .07);
+    padding: 2px 6px; border-radius: 2px;
+  }
+  .info .size {
+    margin: 6px 0 0; font-size: 10.5px;
+    color: var(--text-faint); letter-spacing: .04em;
+  }
+  .info p.desc {
+    margin: 9px 0 0;
+    font-size: 11.5px; line-height: 1.75;
+    color: #a4907a;
+  }
+  .dots { display: flex; gap: 5px; margin-top: 11px; }
+  .dots i {
+    width: 13px; height: 13px; border-radius: 2px;
+    background: var(--c);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .45);
+  }
+
+  /* ── 调色板 ── */
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .sw {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .sw .chip {
+    height: 46px;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .4);
+  }
+  .sw .meta { padding: 8px 10px 10px; }
+  .sw b {
+    display: block; font-size: 11px; font-weight: 500;
+    color: #cfb994; letter-spacing: .04em;
+  }
+  .sw code {
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 10px; color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  /* ── 手法说明 ── */
+  .techs { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .tech {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--gold-dim);
+    padding: 14px 16px;
+  }
+  .tech b {
+    display: block; font-size: 12px; color: #e0c89e;
+    letter-spacing: .06em; margin-bottom: 6px;
+  }
+  .tech code {
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 10.5px; color: #a9752f;
+  }
+  .tech p {
+    margin: 7px 0 0; font-size: 11.5px; line-height: 1.75; color: #a4907a;
+  }
+
+  .notice {
+    margin-top: 26px; padding: 16px 18px;
+    background: rgba(192, 57, 43, .07);
+    border: 1px solid rgba(192, 57, 43, .3);
+    border-left: 2px solid #c0392b;
+    font-size: 12px; line-height: 1.8; color: #c9a999;
+    display: none;
+  }
+  .notice code {
+    font-family: "Cascadia Code", Consolas, monospace;
+    color: #e0a878; background: rgba(0,0,0,.3); padding: 1px 5px;
+  }
+  footer {
+    margin-top: 64px; padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-size: 11px; color: var(--text-faint);
+    letter-spacing: .08em;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  iframe { position: fixed; left: -9999px; top: 0; width: 960px; height: 540px; border: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>素材图鉴 · <em>Art Atlas</em></h1>
+    <p>Act I 海滩 · Act II 莲地 · Act III 洞窟 — 手绘风素材清单</p>
+    <div class="stats">
+      <div class="stat"><b id="n-items">—</b><span>绘制单元</span></div>
+      <div class="stat"><b id="n-colors">—</b><span>调色板色</span></div>
+      <div class="stat"><b>480 × 270</b><span>逻辑分辨率</span></div>
+      <div class="stat"><b>2×</b><span>渲染倍率</span></div>
+    </div>
+    <div class="notice" id="notice">
+      图鉴需要读取同目录的 <code>proto-hand.html</code> 里的绘制函数，直接双击打开会被浏览器的同源策略拦住。<br>
+      请在本目录起一个本地服务器再访问：<code>npx serve .</code> 或 <code>python -m http.server</code>
+    </div>
+  </header>
+  <div id="sections"></div>
+  <footer>
+    <span>所有图形由原型实时绘制，改 proto-hand.html 后刷新本页即同步</span>
+    <span>手绘三手法：粗黑描边 · 确定性抖动 · 材质分层</span>
+  </footer>
+</div>
+
+<iframe id="kit" src="proto-hand.html"></iframe>
+<canvas id="bench"></canvas>
+
+<script>
+/* ── 元素清单：与实际绘制函数一一对应 ───────────────
+   box    = [x, y, w, h] 逻辑坐标裁剪框（anchor 元素相对锚点）
+   zoom   = 展示放大倍数
+   pre    = 绘制前先铺的底层（合成展示用）             */
+const ITEMS = [
+  {
+    group: '角色与敌人',
+    key: 'hero', name: '奥德修斯', en: 'Odysseus',
+    fn: 'drawHero(x, y)', size: '≈ 42 × 72 px · 脚底锚点',
+    desc: '整体剪影成型：颈、肩、手臂、腰、腿一次画完，只有外轮廓描黑边。深盔罩面，两排野猪牙面甲（荷马原典里奥德修斯的标志装备），青铜胸板与护胫、皮条裙，披风从双肩包到膝上。',
+    dots: ['#4a4d3b', '#665c45', '#85362c', '#b08a48', '#ece3cb'],
+    box: [-23, -74, 46, 80], zoom: 2.6
+  },
+  {
+    group: '角色与敌人',
+    key: 'citizen', name: '民众', en: 'Citizen',
+    fn: 'drawCitizen(x, y, i)', size: '≈ 26 × 46 px · 脚底锚点',
+    desc: '一体剪影的小个子平民：亚麻短衣罩住上身，裸腿从衣摆下伸出。右手举着石头——被逼到墙角或玩家贴近时才停下来还手。',
+    dots: ['#c4ad84', '#3a2a1e', '#8a8078'],
+    box: [-13, -48, 26, 52], zoom: 4
+  },
+  {
+    group: '角色与敌人',
+    key: 'soldier', name: '士兵', en: 'Soldier',
+    fn: 'drawSoldier(x, y, i)', size: '≈ 40 × 74 px · 脚底锚点',
+    desc: '一体剪影的重装步兵：肩、臂、腿连成一片，红战裙和青铜胸甲是剪影内分区。圆盾挂在左臂外，长矛斜举。第一幕的主要对手。',
+    dots: ['#8a6132', '#b89454', '#8a3328', '#a03830', '#6b4a2f'],
+    box: [-21, -76, 42, 80], zoom: 2.75
+  },
+  {
+    group: '角色与敌人',
+    key: 'chariot', name: '战车长', en: 'The Charioteer',
+    fn: 'drawChariot(x, y)', size: '≈ 100 × 116 px · 脚底锚点',
+    desc: '第一幕首领。两匹马拉的木战车，六辐车轮、木板车厢，车上战士的羽冠比普通士兵高一头。碰撞盒 34×24、击退系数 0.1——几乎打不退。',
+    dots: ['#5c3e21', '#6b4a2f', '#8a3328', '#a03830', '#eddcbe'],
+    box: [-50, -112, 100, 120], zoom: 1.85
+  },
+  {
+    group: '角色与敌人',
+    key: 'lotusEater', name: '食莲者', en: 'Lotus Eater',
+    fn: 'drawLotusEater(x, y, i)', size: '≈ 24 × 57 px · 脚底锚点',
+    desc: '一体剪影：上身、手臂、腿连成一片，破布裙是剪影内的色块。青白皮肤、闭着眼，头顶开一朵莲花、胸前捧一朵。步频比别的杂兵慢。',
+    dots: ['#b6c4ab', '#7a7250', '#e8a8bd', '#f0d27a'],
+    box: [-13, -58, 26, 62], zoom: 3.2
+  },
+  {
+    group: '角色与敌人',
+    key: 'lotusKing', name: '食莲人王', en: 'The Lotus King',
+    fn: 'drawLotusKing(x, y)', size: '≈ 52 × 80 px · 脚底锚点',
+    desc: '一体剪影：头、颈、肥肚子、腿连成一个梨形，腰布带是剪影内的色块。闭眼微笑、三朵莲花冠，右手高举一支莲花，脚踩荷叶。',
+    dots: ['#8a9a64', '#7f8f5c', '#6d7c4e', '#e8a8bd', '#f0d27a'],
+    box: [-26, -80, 52, 84], zoom: 2.6
+  },
+  {
+    group: '角色与敌人',
+    key: 'skeleton', name: '骷髅兵', en: 'Skeleton',
+    fn: 'drawSkeleton(x, y, i)', size: '≈ 36 × 44 px · 脚底锚点',
+    desc: '骨架不适用剪影法，改用关节串联：胸腔是一块完整体块，股骨—膝关节—胫骨分段，肩、肘各有关节球，头骨带眼窝火光。',
+    dots: ['#ece3cb', '#bdb096', '#b08a48'],
+    box: [-18, -58, 36, 64], zoom: 3
+  },
+  {
+    group: '角色与敌人',
+    key: 'cyclops', name: '独眼巨人', en: 'Cyclops',
+    fn: 'drawCyclops(x, y)', size: '≈ 90 × 136 px · 脚底锚点',
+    desc: '一体剪影：双腿和躯干连成一片，兽皮裙、护腿、胸疤都在剪影内分区完成。橄榄绿粗皮、单只白眼、獠牙，右手举木棒。',
+    dots: ['#8e9375', '#6c7157', '#7d5a39', '#f7f1de'],
+    box: [-46, -140, 94, 144], zoom: 1.4
+  },
+
+  {
+    group: '第一幕 · 海滩',
+    key: 'sand', name: '沙滩', en: 'Sand',
+    fn: 'drawSandGround()', size: '全屏 480 × 270',
+    desc: '暖沙打底，36 块低对比明暗斑 + 17 道风吹沙纹 + 440 颗沙粒，再点八片贝壳和五组成对脚印。比岩地亮一档，是室外场景的基调。',
+    dots: ['#8d7853', '#6b5940', '#a89263'],
+    box: [0, 0, 480, 270], zoom: 0.7, wide: true, full: true
+  },
+  {
+    group: '第一幕 · 海滩',
+    key: 'campEdge', name: '海滩边界', en: 'Shore',
+    fn: 'drawCampWalls()', size: '全屏 480 × 270',
+    desc: '上方是远海：深蓝绿水面、三道缓慢起伏的浪线、贴岸泡沫与湿沙渐变；左右立削尖木栅栏，下方一排沙丘配杂草；顶部中央的木栈桥是出口。',
+    dots: ['#2c4a52', '#1d333b', '#d3e2dc', '#6b4a2f'],
+    box: [0, 0, 480, 270], zoom: 0.8, wide: true, full: true
+  },
+  {
+    group: '第一幕 · 海滩',
+    key: 'ship', name: '黑船', en: 'Black Ship',
+    fn: 'drawShip(cx, cy)', size: '≈ 124 × 40 px',
+    desc: '奥德修斯的黑船，横拖在沙滩上。俯视的尖首方尾船体、五道船肋、收起的桅杆，船首那只辟邪眼是迈锡尼船只的典型装饰。',
+    dots: ['#3d2718', '#241610', '#ece3cb'],
+    box: [-66, -24, 132, 48], zoom: 2.1, pre: ['sand']
+  },
+  {
+    group: '第一幕 · 海滩',
+    key: 'tent', name: '帐篷', en: 'Tent',
+    fn: 'drawTent(cx, cy)', size: '≈ 60 × 46 px',
+    desc: '俯视的梯形布帐，坡面左亮右暗，中间一道脊线，前缘开三角形黑门洞，顶端露出一截支杆。',
+    dots: ['#8f6e46', '#4b3823'],
+    box: [-34, -22, 68, 48], zoom: 3.4, pre: ['sand']
+  },
+  {
+    group: '第一幕 · 海滩',
+    key: 'campfire', name: '营火', en: 'Campfire',
+    fn: 'drawCampfire(cx, cy)', size: '≈ 36 × 30 px（光晕半径 34）',
+    desc: '十一块大小错落的石头围成火塘，中间是不规则黑炭堆，几粒余烬在 lighter 光晕里发亮。和洞窟火盆同源，但只剩微光。',
+    dots: ['#6e6355', '#2a1c14', '#ff9636'],
+    box: [-36, -36, 72, 60], zoom: 3.2, pre: ['sand']
+  },
+  {
+    group: '第一幕 · 海滩',
+    key: 'loot', name: '战利品', en: 'Spoils',
+    fn: 'drawLoot(cx, cy)', size: '≈ 40 × 28 px',
+    desc: '劫掠伊斯马罗斯的收获：一个打了十字木条的木箱，旁边斜靠一面圆盾。为第一幕"赢了战斗、抢了东西、却被援军赶走"埋下伏笔。',
+    dots: ['#7a5533', '#8a5a2e', '#b08a48'],
+    box: [-16, -14, 44, 30], zoom: 5, pre: ['sand']
+  },
+
+  {
+    group: '第二幕 · 莲地',
+    key: 'lotusGround', name: '泥地与莲池', en: 'Lotus Ground',
+    fn: 'drawLotusGround()', size: '全屏 480 × 270',
+    desc: '暗绿泥地打底，三块不规则水面（带反光弧），散着草叶和落瓣。整幕偏青绿，和第一幕的暖沙、第三幕的暖褐拉开距离。',
+    dots: ['#3f4a34', '#56603f', '#43565a', '#e8a8bd'],
+    box: [0, 0, 480, 270], zoom: 0.7, wide: true, full: true
+  },
+  {
+    group: '第二幕 · 莲地',
+    key: 'lotusEdge', name: '林缘边界', en: 'Wood Edge',
+    fn: 'drawLotusEdge()', size: '全屏 480 × 270',
+    desc: '上方两层树冠围成林缘，左右是灌木团和会随风摆的芦苇，底部是水岸草丘，顶部中央留一条小路当出口。',
+    dots: ['#2c3a22', '#3e4f2c', '#5e6b3c', '#33402a'],
+    box: [0, 0, 480, 270], zoom: 0.8, wide: true, full: true
+  },
+  {
+    group: '第二幕 · 莲地',
+    key: 'lotusPad', name: '荷叶', en: 'Lotus Pad',
+    fn: 'drawPad(cx, cy, r)', size: 'r = 15 时约 30 × 28 px',
+    desc: '漂在水面上的扁圆叶片，带一个缺口和一道叶脉。r 参数控制大小，同一株莲可以配几种尺寸。',
+    dots: ['#3e5a36', '#2a3a26'],
+    box: [-17, -13, 34, 26], zoom: 5
+  },
+  {
+    group: '第二幕 · 莲地',
+    key: 'lotusBloom', name: '莲花', en: 'Lotus Bloom',
+    fn: 'drawBloom(cx, cy, s)', size: 's = 1.1 时约 20 × 22 px',
+    desc: '五片旋转椭圆拼成的花冠，金黄花心。同一个函数复用在四处：水里的、食莲者头顶的、手里的、王冠上的，只改缩放。',
+    dots: ['#e8a8bd', '#f2c2d0', '#f0d27a'],
+    box: [-10, -12, 20, 24], zoom: 6
+  },
+  {
+    group: '第二幕 · 莲地',
+    key: 'sleeper', name: '睡倒的人', en: 'Sleeper',
+    fn: 'drawSleeper(cx, cy)', size: '≈ 48 × 26 px',
+    desc: '吃多了莲花、直接躺在岸边的人。横摊的一团身子、闭着的眼、头顶还在开花——比任何文字都更能说明这地方发生了什么。',
+    dots: ['#8a8262', '#b6c4ab', '#e8a8bd'],
+    box: [-24, -20, 48, 26], zoom: 4
+  },
+
+  {
+    group: '第三幕 · 洞窟',
+    key: 'ground', name: '岩地', en: 'Ground',
+    fn: 'drawGround()', size: '全屏 480 × 270',
+    desc: '暖棕岩面打底，不规则石块拼贴 + 苔藓斑 + 碎石颗粒，是整幕的色调基调。',
+    dots: ['#5f4e3f', '#463a30', '#7a6652', '#4c5e37'],
+    box: [0, 0, 480, 270], zoom: 0.7, wide: true, full: true
+  },
+  {
+    group: '第三幕 · 洞窟',
+    key: 'walls', name: '洞壁与石门', en: 'Walls',
+    fn: 'drawWalls()', size: '全屏 480 × 270（内含 drawDoor）',
+    desc: '环形手绘石墙压住画面四周，顶部中央开石拱门洞，门内透出冷蓝微光，与暖色火焰形成冷暖对比。',
+    dots: ['#352a22', '#4a3a2c', '#8f6d4a', '#78beeb'],
+    box: [0, 0, 480, 270], zoom: 0.8, wide: true, full: true
+  },
+  {
+    group: '第三幕 · 洞窟',
+    key: 'door', name: '石门', en: 'Door',
+    fn: 'drawDoor(cx, cy)', size: '≈ 64 × 46 px · 中心锚点',
+    desc: '房间出入口。石拱粗描边，门内用 lighter 叠加冷光，暗示通往下一间。',
+    dots: ['#120c0a', '#8f6d4a', '#78beeb'],
+    box: [-33, -32, 66, 44], zoom: 3
+  },
+  {
+    group: '第三幕 · 洞窟',
+    key: 'jar', name: '陶罐', en: 'Jar',
+    fn: 'drawJar(x, y)', size: '≈ 28 × 28 px · 底部锚点',
+    desc: '可破坏道具。红褐陶身 + 罐口高光，和岩地同属暖棕家族，靠明度差跳出来。',
+    dots: ['#7a4a34', '#b08a48'],
+    box: [-14, -24, 28, 28], zoom: 4
+  },
+  {
+    group: '第三幕 · 洞窟',
+    key: 'bones', name: '骸骨', en: 'Bones',
+    fn: 'drawBones(x, y, seed)', size: '≈ 36 × 22 px',
+    desc: '散落骨堆，纯地面装饰。用 seed 控制手绘抖动，摆多少处都不会重复。',
+    dots: ['#ece3cb', '#2e201a'],
+    box: [-14, -10, 36, 20], zoom: 4
+  },
+  {
+    group: '第三幕 · 洞窟',
+    key: 'fire', name: '火盆', en: 'Brazier',
+    fn: 'drawFire(x, y, seed)', size: '≈ 52 × 58 px（光晕半径 104）',
+    desc: '洞窟唯一光源。三层火焰各自不同频率摆动，外层用 lighter 叠加暖橙径向光把整间屋子染暖。',
+    dots: ['#ffc35a', '#ff7a35', '#3b2a20'],
+    box: [-27, -38, 54, 58], zoom: 3
+  },
+
+  {
+    group: '氛围与界面',
+    key: 'dust', name: '浮尘', en: 'Dust',
+    fn: 'drawDust()', size: '全屏叠加',
+    desc: '24 粒确定性浮尘缓慢横向漂移，给静态画面补上空气感。全程 lighter 混合，只提亮不遮暗。',
+    dots: ['#ffd6a0'],
+    box: [0, 0, 480, 270], zoom: 0.8, wide: true, pre: ['ground'], full: true
+  },
+  {
+    group: '氛围与界面',
+    key: 'vignette', name: '暗角', en: 'Vignette',
+    fn: 'drawVignette()', size: '全屏叠加',
+    desc: '径向暗角压住画面边缘，把视线收拢到中央战斗区，同时压掉边角的杂乱细节。',
+    dots: ['#100906', '#0c0705'],
+    box: [0, 0, 480, 270], zoom: 0.8, wide: true, pre: ['ground'], full: true
+  },
+  {
+    group: '氛围与界面',
+    key: 'heart', name: '红心', en: 'Heart',
+    fn: 'heart(x, y, s, filled)', size: 's = 6 时约 16 × 13 px',
+    desc: '以撒式血量单位，贝塞尔曲线画心形，左上留一片高光。空心版本用于已失去的血量。',
+    dots: ['#c0392b', '#1b1210'],
+    box: [-13, -11, 26, 22], zoom: 4
+  },
+  {
+    group: '氛围与界面',
+    key: 'ui', name: 'HUD', en: 'Heads-up',
+    fn: 'drawUI()', size: '顶部 480 × 44',
+    desc: '左上红心血量、金币计数，右上小地图（四格房间，当前格高亮）。全部逻辑像素直绘，不做缩放。',
+    dots: ['#c0392b', '#b98d3c', '#f3e6cc'],
+    box: [0, 0, 480, 46], zoom: 1, wide: true, pre: ['ground'], full: true
+  }
+];
+
+/* ── 调色板 ─────────────────────────────────── */
+const PALETTE = [
+  ['INK',        '描边墨',   '所有形状统一的粗黑描边'],
+  ['INK_SOFT',   '软描边',   '小物件、骨头的次级描边'],
+  ['ROCK',       '岩面',     '地面主体色'],
+  ['ROCK_D',     '岩面暗部', '石块之间的缝隙'],
+  ['ROCK_LL',    '岩面亮部', '受火光照射的岩面'],
+  ['MOSS',       '苔藓',     '岩地苔藓斑'],
+  ['MOSS_L',     '苔藓亮',   '苔藓高光'],
+  ['WALL',       '洞壁',     '四周石墙主体'],
+  ['WALL_L',     '洞壁亮',   '石墙受光面'],
+  ['FIRE',       '火焰',     '火焰核心'],
+  ['FIRE_D',     '火焰暗',   '火焰外焰'],
+  ['ARMOR',      '旧甲',     '主角躯干甲片'],
+  ['HELM',       '青铜盔',   '盔体与面甲'],
+  ['HELM_D',     '盔暗部',   '盔体阴影面'],
+  ['CAPE',       '披风',     '暗酒红披风、顶鬃结'],
+  ['RED',        '红心',     '血量单位'],
+  ['TRIM',       '金饰边',   '铆钉、扣件、箭头'],
+  ['SKIN',       '肤色',     '主角皮肤'],
+  ['BONE',       '骨白',     '骷髅、野猪牙、骨堆'],
+  ['BONE_D',     '骨暗部',   '骨骼阴影面'],
+  ['CY_SKIN',    '巨人皮',   '独眼巨人主体'],
+  ['CY_SKIN_D',  '巨人皮暗', '巨人阴影面'],
+  ['LEATHER',    '皮革',     '皮条裙、护腕、兽皮'],
+  ['SAND',       '沙面',     '第一幕沙滩主体'],
+  ['SAND_D',     '沙面暗部', '沙丘与湿沙边缘'],
+  ['SAND_L',     '沙面亮部', '受光处的暖沙'],
+  ['SEA',        '海水',     '远海主体'],
+  ['SEA_D',      '深海',     '海面最上方'],
+  ['FOAM',       '浪沫',     '浪线与拍岸泡沫'],
+  ['WOOD',       '木料',     '栅栏、栈桥、桅杆'],
+  ['WOOD_D',     '木料暗部', '横木与木缝'],
+  ['MUD',        '泥地',     '第二幕地面主体'],
+  ['MUD_D',      '泥地暗部', '泥地阴影'],
+  ['MUD_L',      '泥地亮部', '受光处的泥地'],
+  ['POND',       '池水',     '莲池水面'],
+  ['POND_L',     '水面反光', '池面高光弧'],
+  ['REED',       '芦苇',     '水边芦苇杆'],
+  ['TREE',       '树冠',     '林缘深绿'],
+  ['TREE_L',     '树冠亮部', '受光的树冠'],
+  ['LOTUS_PINK', '莲花瓣',   '莲花主色'],
+  ['LOTUS_DEEP', '花瓣暗部', '花瓣阴影'],
+  ['LOTUS_Y',    '花心',     '莲花蕊'],
+  ['LOTUS_SKIN', '食莲者肤色', '青白皮肤']
+];
+
+/* ── 绘制手法 ───────────────────────────────── */
+const TECHS = [
+  ['ink(build, fill, lw)', '统一描边', '所有形状先填色、再用同一支黑笔压边。描边宽度随物件体量在 0.9~2.8 之间变化，这是整套画风的粘合剂。'],
+  ['jit(i) / sj(i)', '确定性抖动', '用 sin 哈希生成 -1~1 的固定随机数。手绘的“歪”每帧稳定不变，不会抽搐成噪点。'],
+  ['innerLight(cx, cy, rx, ry, color, alpha)', '内叠光', '裁剪进形状内部再叠一层椭圆亮部，不画渐变也能拉出体积。'],
+  ['shadow(cx, cy, rx, ry, a)', '落地阴影', '角色脚下压一层椭圆暗影，让扁平贴纸站得住地面。']
+];
+
+/* ── 构建 DOM ───────────────────────────────── */
+const sectionsEl = document.getElementById('sections');
+const groups = [];
+ITEMS.forEach(function (it) {
+  let g = groups.find(function (x) { return x.name === it.group; });
+  if (!g) { g = { name: it.group, items: [] }; groups.push(g); }
+  g.items.push(it);
+});
+
+groups.forEach(function (g) {
+  const sec = document.createElement('section');
+  const h2 = document.createElement('h2');
+  h2.innerHTML = g.name + '<i>' + g.items.length + '</i>';
+  sec.appendChild(h2);
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+
+  g.items.forEach(function (it) {
+    const card = document.createElement('article');
+    card.className = 'card' + (it.wide ? ' wide' : '');
+    card.dataset.key = it.key;
+
+    const stage = document.createElement('div');
+    stage.className = 'stage';
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(it.box[2] * it.zoom);
+    cv.height = Math.round(it.box[3] * it.zoom);
+    stage.appendChild(cv);
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.innerHTML =
+      '<h3>' + it.name + '<span>' + it.en + '</span></h3>' +
+      '<code>' + it.fn + '</code>' +
+      '<p class="size">' + it.size + '</p>' +
+      '<p class="desc">' + it.desc + '</p>' +
+      '<div class="dots">' + it.dots.map(function (c) {
+        return '<i style="--c:' + c + '"></i>';
+      }).join('') + '</div>';
+
+    card.appendChild(stage);
+    card.appendChild(info);
+    card._spec = it;
+    card._canvas = cv;
+    grid.appendChild(card);
+  });
+
+  sec.appendChild(grid);
+  sectionsEl.appendChild(sec);
+});
+
+/* 调色板 */
+(function () {
+  const sec = document.createElement('section');
+  sec.innerHTML = '<h2>调色板<i>' + PALETTE.length + '</i></h2>';
+  const box = document.createElement('div');
+  box.className = 'swatches';
+  sec.appendChild(box);
+  sectionsEl.appendChild(sec);
+  sec._box = box;
+
+  /* 占位，等原型就绪后填真实色值 */
+  window.__paletteSlot = box;
+})();
+
+/* 手法 */
+(function () {
+  const sec = document.createElement('section');
+  sec.innerHTML = '<h2>绘制手法<i>3</i></h2>';
+  const box = document.createElement('div');
+  box.className = 'techs';
+  TECHS.forEach(function (t) {
+    const d = document.createElement('div');
+    d.className = 'tech';
+    d.innerHTML = '<b>' + t[1] + '</b><code>' + t[0] + '</code><p>' + t[2] + '</p>';
+    box.appendChild(d);
+  });
+  sec.appendChild(box);
+  sectionsEl.appendChild(sec);
+})();
+
+document.getElementById('n-items').textContent = ITEMS.length;
+document.getElementById('n-colors').textContent = PALETTE.length;
+
+/* ── 从原型取绘制函数并实时渲染 ───────────────── */
+const frame = document.getElementById('kit');
+let A = null;
+const AX = 240, AY = 142;   // 原型画布上的锚点（逻辑坐标）
+
+function init() {
+  A = frame.contentWindow && frame.contentWindow.__atlas;
+  if (!A) return;
+
+  /* 填真实色值 */
+  const box = window.__paletteSlot;
+  PALETTE.forEach(function (p) {
+    const hex = A.palette[p[0]];
+    if (!hex) return;
+    const d = document.createElement('div');
+    d.className = 'sw';
+    d.innerHTML =
+      '<div class="chip" style="background:' + hex + '"></div>' +
+      '<div class="meta"><b>' + p[1] + '</b><code>' + hex + '</code>' +
+      '<div style="font-size:10px;color:#5e4d3c;margin-top:4px;line-height:1.5">' + p[2] + '</div></div>';
+    box.appendChild(d);
+  });
+
+  const cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  let lastDraw = 0;
+
+  function tick(now) {
+    requestAnimationFrame(tick);
+    if (now - lastDraw < 33) return;   // 约 30fps，够看呼吸和摆动
+    lastDraw = now;
+    const tt = now / 1000;
+
+    cards.forEach(function (card) {
+      const s = card._spec;
+      const cv = card._canvas;
+      const g = cv.getContext('2d');
+
+      A.reset(tt);
+      (s.pre || []).forEach(function (k) { A.items[k](); });
+      if (s.full) {
+        A.items[s.key]();
+      } else {
+        A.items[s.key](AX, AY);
+      }
+
+      const sx = s.full ? s.box[0] : AX + s.box[0];
+      const sy = s.full ? s.box[1] : AY + s.box[1];
+
+      g.imageSmoothingEnabled = s.zoom < 1;   // 缩小用平滑，放大保留硬像素
+      g.clearRect(0, 0, cv.width, cv.height);
+      g.drawImage(
+        A.cvs,
+        Math.round(sx * A.RS), Math.round(sy * A.RS),
+        Math.round(s.box[2] * A.RS), Math.round(s.box[3] * A.RS),
+        0, 0, cv.width, cv.height
+      );
+    });
+  }
+  requestAnimationFrame(tick);
+}
+
+frame.addEventListener('load', init);
+
+setTimeout(function () {
+  try {
+    if (!A || !frame.contentWindow.__atlas) throw new Error('blocked');
+  } catch (e) {
+    document.getElementById('notice').style.display = 'block';
+  }
+}, 2500);
+</script>
+</body>
+</html>
